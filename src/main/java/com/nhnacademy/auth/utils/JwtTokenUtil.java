@@ -8,9 +8,9 @@ import java.util.Date;
 public class JwtTokenUtil {
     private static long expiredTimeMs = 1000 * 60 * 60; // 1 hour
 
-    public static String createToken (String userAccount, String key) {
+    public static String createToken (String userId, String key) {
         Claims claims = Jwts.claims();
-        claims.put("userAccount", userAccount);
+        claims.put("userId", userId);
 
         return Jwts.builder()
                 .setClaims(claims)
