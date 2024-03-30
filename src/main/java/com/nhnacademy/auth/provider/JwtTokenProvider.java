@@ -6,9 +6,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.time.DateUtils;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -24,7 +23,6 @@ public class JwtTokenProvider {
     private final JwtProperties jwtProperties;
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 
     public String generateAccessToken(String userId) {
         return createJwtToken(userId, EXPIRED_TIME_MINUTE);
@@ -32,7 +30,7 @@ public class JwtTokenProvider {
 
     public String generateRefreshToken(String userId) {
         String refreshToken = createJwtToken(userId, REFRESH_TOKEN_EXPIRED_TIME_WEEK);
-        valueOperations.set(refreshToken, userId);
+        redisTemplate.opsForValue().set(refreshToken, userId);
         return refreshToken;
     }
 
@@ -41,7 +39,6 @@ public class JwtTokenProvider {
         claims.put("userId", userId);
 
         Date now = new Date();
-
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -53,7 +50,7 @@ public class JwtTokenProvider {
 
     public String regenerateAccessToken(String refreshToken) {
         if (checkRefreshToken(refreshToken)) {
-            String getUserIdFromRedis = valueOperations.get(refreshToken);
+            String getUserIdFromRedis = redisTemplate.opsForValue().get(refreshToken);
             return generateAccessToken(getUserIdFromRedis);
         }
         return null;
