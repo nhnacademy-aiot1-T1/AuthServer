@@ -13,6 +13,6 @@ public class UserDto {
     private UserState userState;
 
     private UserRole userRole;
-
-
 }
+
+

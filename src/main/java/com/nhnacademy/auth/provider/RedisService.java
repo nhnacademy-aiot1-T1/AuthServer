@@ -1,13 +1,10 @@
 package com.nhnacademy.auth.provider;
 
-import com.nhnacademy.auth.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Date;
-
 @Service
 public class RedisService {
 

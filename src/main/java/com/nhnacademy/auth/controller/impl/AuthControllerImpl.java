@@ -23,8 +23,7 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<LoginResponse> generateAccessToken(UserDto userDto) {
 
         String accessToken = jwtTokenProvider.generateAccessToken(userDto.getUserId());
-//        String refreshToken = jwtTokenProvider.generateRefreshToken(userDto.getUserId());
-        String refreshToken = "12345";
+        String refreshToken = jwtTokenProvider.generateRefreshToken(userDto.getUserId());
         LoginResponse loginResponse = new LoginResponse(userDto, accessToken, refreshToken);
 
         return ResponseEntity.status(HttpStatus.CREATED)
