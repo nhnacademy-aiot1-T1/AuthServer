@@ -30,7 +30,6 @@ class AuthControllerImplTest {
 
     private static final String userId = "userId";
     private static final String accessToken = "accessToken";
-
     private static final String refreshToken = "refreshToken";
 
     @Test
@@ -41,7 +40,7 @@ class AuthControllerImplTest {
         mockMvc.perform(post("/auth/accessToken")
                         .with(csrf())
                         .with(user("username").password("password"))
-                .contentType(MediaType.TEXT_PLAIN)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(userId))
                 .andExpect(status().isCreated());
     }
@@ -59,7 +58,7 @@ class AuthControllerImplTest {
     }
 
     @Test
-    void regenerageAccessToken() throws Exception{
+    void regenerateAccessToken() throws Exception{
         given(jwtTokenProvider.regenerateAccessToken(userId)).willReturn(accessToken);
 
         mockMvc.perform(post("/auth/regenerateToken")
