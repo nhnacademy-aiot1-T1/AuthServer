@@ -1,9 +1,14 @@
 package com.nhnacademy.auth.dto;
 
+import lombok.AllArgsConstructor;
+
 /**
  * Login Request 대한 Response Body 내용
  */
+@AllArgsConstructor
 public class LoginResponse {
-  //FIXME : gateway로 보내는 부분 구현 부탁합니다
-
+    String userId;
+    UserRole userRole;
+    String accessToken;
+    String refreshToken;
 }
