@@ -1,8 +1,9 @@
-package com.nhnacademy.auth.service;
+package com.nhnacademy.auth.service.impl;
 
 import com.nhnacademy.auth.adapter.AccountAdapter;
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.User;
+import com.nhnacademy.auth.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
