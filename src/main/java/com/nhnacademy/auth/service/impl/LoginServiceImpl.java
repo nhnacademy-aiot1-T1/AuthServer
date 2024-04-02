@@ -3,6 +3,7 @@ package com.nhnacademy.auth.service.impl;
 import com.nhnacademy.auth.adapter.AccountAdapter;
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.User;
+import com.nhnacademy.auth.exception.UserIdNotFoundException;
 import com.nhnacademy.auth.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +20,7 @@ public class LoginServiceImpl implements LoginService {
 
   @Override
   public boolean match(LoginInfo loginRequest) {
-    LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId()).orElseThrow();
+    LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId()).orElseThrow(UserIdNotFoundException::new);
     return passwordEncoder.matches(loginRequest.getPassword(), loginInfo.getPassword());
   }
 
