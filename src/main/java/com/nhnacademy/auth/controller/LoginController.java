@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/login")
 @RequiredArgsConstructor
 public class LoginController {
 
@@ -36,7 +35,7 @@ public class LoginController {
      * @Exception : PasswordNotMatchException(userId)
      * @return : responseFormat
      */
-  @PostMapping(value = "/login")
+  @PostMapping
   public ResponseEntity<ResponseFormat> login(@RequestBody LoginInfo info) {
       if (!loginService.match(info)) {
           throw new PasswordNotMatchException(info.getId());
