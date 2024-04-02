@@ -4,7 +4,7 @@ import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.LoginResponse;
 import com.nhnacademy.auth.dto.ResponseFormat;
 import com.nhnacademy.auth.dto.User;
-import com.nhnacademy.auth.exception.UserNotFoundException;
+import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.service.JwtTokenService;
 import com.nhnacademy.auth.service.LoginService;
 import java.time.LocalDateTime;
@@ -26,6 +26,8 @@ public class LoginController {
 
   private static final String CONTENT_TYPE = "Content-Type";
   private static final String APPLICATION_JSON = "application/json";
+  private static final String AUTHORIZATION = "Authorization";
+  private static final String BEARER = "Bearer ";
 
     /**
      * 로그인에 성공했을 경우 : userId, userRole, accessToken, refreshToken 발급.
@@ -38,26 +40,24 @@ public class LoginController {
      */
   @PostMapping(value = "/login")
   public ResponseEntity<ResponseFormat> login(@RequestBody LoginInfo info) {
-      LoginResponse loginResponse = null;
-      if (loginService.match(info)) {
-          String accessToken = jwtTokenService.generateAccessToken(info.getId());
-          String refreshToken = jwtTokenService.generateRefreshToken(info.getId());
-          User user = loginService.getUser(info.getId());
+      if (!loginService.match(info)) {
+          throw new PasswordNotMatchException(info.getId());
+      }
+      String accessToken = jwtTokenService.generateAccessToken(info.getId());
+      String refreshToken = jwtTokenService.generateRefreshToken(info.getId());
+      User user = loginService.getUser(info.getId());
 
-          loginResponse = new LoginResponse(user.getUserId(), user.getUserRole(), accessToken, refreshToken);
-      }
-      else {
-          throw new UserNotFoundException(info.getId());
-      }
+      LoginResponse loginResponse = new LoginResponse(user.getUserId(), user.getUserRole(), refreshToken);
 
       return ResponseEntity.status(HttpStatus.CREATED)
               .header(CONTENT_TYPE, APPLICATION_JSON)
+              .header(AUTHORIZATION, BEARER + accessToken)
               .body(ResponseFormat.builder()
-                .status("success")
-                .data(loginResponse)
-                .message(null)
-                .localDateTime(LocalDateTime.now())
-                .build());
+                      .status("success")
+                      .data(loginResponse)
+                      .message(null)
+                      .localDateTime(LocalDateTime.now())
+                      .build());
   }
 
     /**
@@ -73,9 +73,10 @@ public class LoginController {
 
       return  ResponseEntity.status(HttpStatus.CREATED)
               .header(CONTENT_TYPE, APPLICATION_JSON)
+              .header(AUTHORIZATION, BEARER + accessToken)
               .body(ResponseFormat.builder()
                 .status("success")
-                .data(accessToken)
+                .data(null)
                 .message("regenerate access token")
                 .localDateTime(LocalDateTime.now())
                 .build());
