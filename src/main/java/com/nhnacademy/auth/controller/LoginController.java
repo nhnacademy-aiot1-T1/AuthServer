@@ -2,7 +2,7 @@ package com.nhnacademy.auth.controller;
 
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.LoginResponse;
-import com.nhnacademy.auth.dto.ResponseFormat;
+import com.nhnacademy.auth.dto.Response;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.service.JwtTokenService;
@@ -36,7 +36,7 @@ public class LoginController {
      * @return : responseFormat
      */
     @PostMapping
-    public ResponseEntity<ResponseFormat> login(@RequestBody LoginInfo info) {
+    public ResponseEntity<Response<LoginResponse>> login(@RequestBody LoginInfo info) {
         if (!loginService.match(info)) {
             throw new PasswordNotMatchException(info.getId());
         }
@@ -48,12 +48,7 @@ public class LoginController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(CONTENT_TYPE, APPLICATION_JSON)
-                .body(ResponseFormat.builder()
-                        .status("success")
-                        .data(loginResponse)
-                        .message(null)
-                        .localDateTime(LocalDateTime.now())
-                        .build());
+                .body(Response.success(loginResponse, "로그인 성공"));
     }
 
     /**
@@ -64,16 +59,11 @@ public class LoginController {
      * @return : responseFormat
      */
     @PostMapping(value = "/regenerate")
-    public ResponseEntity<ResponseFormat> regenerateAccessToken(@RequestBody String refreshToken) {
+    public ResponseEntity<Response<String>> regenerateAccessToken(@RequestBody String refreshToken) {
         String accessToken = jwtTokenService.regenerateAccessToken(refreshToken);
 
         return  ResponseEntity.status(HttpStatus.CREATED)
                 .header(CONTENT_TYPE, APPLICATION_JSON)
-                .body(ResponseFormat.builder()
-                        .status("success")
-                        .data(accessToken)
-                        .message("regenerate access token")
-                        .localDateTime(LocalDateTime.now())
-                        .build());
+                .body(Response.success(accessToken, "regenerate access token"));
     }
 }

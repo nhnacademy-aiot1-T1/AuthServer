@@ -1,6 +1,7 @@
 package com.nhnacademy.auth.service.impl;
 
 import com.nhnacademy.auth.service.RedisService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +12,9 @@ import java.time.Duration;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class RedisServiceImpl implements RedisService {
-    private RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     /**
      * TTL 기능이 있음. timeDuration으로 설정 가능. 단위: sec

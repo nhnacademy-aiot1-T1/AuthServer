@@ -1,6 +1,6 @@
 package com.nhnacademy.auth.advice;
 
-import com.nhnacademy.auth.dto.ResponseFormat;
+import com.nhnacademy.auth.dto.Response;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.exception.RefreshTokenNotFoundException;
 import com.nhnacademy.auth.exception.UserIdNotFoundException;
@@ -13,38 +13,22 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class CommonAdvice {
-    private static final String FAIL = "fail";
 
     @ExceptionHandler(PasswordNotMatchException.class)
-    public ResponseEntity<ResponseFormat> passwordNotMatch(PasswordNotMatchException passwordNotMatchException) {
+    public ResponseEntity<Response<PasswordNotMatchException>> passwordNotMatch(PasswordNotMatchException passwordNotMatchException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ResponseFormat.builder()
-                        .status(FAIL)
-                        .data(passwordNotMatchException)
-                        .message("password가 일치하지 않습니다.")
-                        .localDateTime(LocalDateTime.now())
-                        .build());
+                .body(Response.fail(passwordNotMatchException, "password가 일치하지 않습니다."));
     }
 
     @ExceptionHandler(RefreshTokenNotFoundException.class)
-    public ResponseEntity<ResponseFormat> refreshTokenNotFound (RefreshTokenNotFoundException refreshTokenNotFoundException) {
+    public ResponseEntity<Response<RefreshTokenNotFoundException>> refreshTokenNotFound (RefreshTokenNotFoundException refreshTokenNotFoundException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ResponseFormat.builder()
-                        .status(FAIL)
-                        .data(refreshTokenNotFoundException)
-                        .message("refresh token의 인증에 실패하여, access token의 생성이 불가능합니다.")
-                        .localDateTime(LocalDateTime.now())
-                        .build());
+                .body(Response.fail(refreshTokenNotFoundException, "refresh token의 인증에 실패하여, access token의 생성이 불가능합니다."));
     }
 
     @ExceptionHandler(UserIdNotFoundException.class)
-    public ResponseEntity<ResponseFormat> userIdNotFound (UserIdNotFoundException userIdNotFoundException) {
+    public ResponseEntity<Response<UserIdNotFoundException>> userIdNotFound (UserIdNotFoundException userIdNotFoundException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ResponseFormat.builder()
-                        .status(FAIL)
-                        .data(userIdNotFoundException)
-                        .message("아이디를 찾을 수 없습니다..")
-                        .localDateTime(LocalDateTime.now())
-                        .build());
+                .body(Response.fail(userIdNotFoundException, "아이디를 찾을 수 없습니다.."));
     }
 }

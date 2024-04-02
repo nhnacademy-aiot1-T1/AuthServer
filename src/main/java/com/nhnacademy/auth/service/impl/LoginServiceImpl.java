@@ -2,6 +2,7 @@ package com.nhnacademy.auth.service.impl;
 
 import com.nhnacademy.auth.adaptor.AccountAdapter;
 import com.nhnacademy.auth.dto.LoginInfo;
+import com.nhnacademy.auth.dto.Response;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.UserIdNotFoundException;
 import com.nhnacademy.auth.service.LoginService;
@@ -20,13 +21,20 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public boolean match(LoginInfo loginRequest) {
-        LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId()).orElseThrow(UserIdNotFoundException::new);
+        LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId()).getData();
+        if (loginInfo == null) {
+            throw new UserIdNotFoundException();
+        }
         return passwordEncoder.matches(loginRequest.getPassword(), loginInfo.getPassword());
     }
 
     @Override
     public User getUser(String userId) {
-        return accountAdapter.getUserInfo(userId);
+        User user = accountAdapter.getUserInfo(userId).getData();
+        if (user == null) {
+            throw new UserIdNotFoundException();
+        }
+        return user;
     }
 
 }
