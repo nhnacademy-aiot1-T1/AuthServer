@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Optional;
 
-@FeignClient(value = "account-api", path = "/api/account/users")
+@FeignClient(value = "account-api", path = "/api/users")
 public interface AccountAdapter {
     @GetMapping("/{id}/login")
     Response<LoginInfo> getAccountInfo(@PathVariable String id);
