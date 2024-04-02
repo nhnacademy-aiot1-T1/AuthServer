@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Date;
 
 /**
@@ -33,9 +34,16 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         return createJwtToken(userId, EXPIRED_TIME_MINUTE);
     }
 
+    /**
+     * refresh token이 발급 된다면, 7일 후 자동적으로 삭제되게 TTL 설정.
+     * @param userId
+     * @return refresh token
+     */
     @Override
     public String generateRefreshToken(String userId) {
-        return createJwtToken(userId, REFRESH_TOKEN_EXPIRED_TIME_WEEK);
+        String refreshToken = createJwtToken(userId, REFRESH_TOKEN_EXPIRED_TIME_WEEK);
+        redisService.save(refreshToken, userId, Duration.ofDays(7));
+        return refreshToken;
     }
 
     /**
@@ -68,7 +76,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     @Override
     public String regenerateAccessToken(String refreshToken) {
         if (checkRefreshToken(refreshToken)) {
-            String getUserIdFromRedis = redisService.findRefreshTokenByUserId(refreshToken);
+            String getUserIdFromRedis = redisService.findUserIdByRefreshToken(refreshToken);
             return generateAccessToken(getUserIdFromRedis);
         }
         throw new RefreshTokenNotFoundException(refreshToken);
