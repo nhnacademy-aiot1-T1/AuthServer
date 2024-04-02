@@ -7,6 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public class User {
-    String userId;
-    UserRole userRole;
+    String id;
+    UserStatus status;
+    UserRole role;
 }
