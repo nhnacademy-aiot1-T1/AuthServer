@@ -26,8 +26,6 @@ public class LoginController {
 
   private static final String CONTENT_TYPE = "Content-Type";
   private static final String APPLICATION_JSON = "application/json";
-  private static final String AUTHORIZATION = "Authorization";
-  private static final String BEARER = "Bearer ";
 
     /**
      * 로그인에 성공했을 경우 : userId, userRole, accessToken, refreshToken 발급.
@@ -35,7 +33,7 @@ public class LoginController {
      * 로그인에 실패했을 경우 : exception.
      * </p>
      * @param info : gateway에서 들어오는 dataDto
-     * @Exception : UserNotFoundException(userId)
+     * @Exception : PasswordNotMatchException(userId)
      * @return : responseFormat
      */
   @PostMapping(value = "/login")
@@ -47,11 +45,10 @@ public class LoginController {
       String refreshToken = jwtTokenService.generateRefreshToken(info.getId());
       User user = loginService.getUser(info.getId());
 
-      LoginResponse loginResponse = new LoginResponse(user.getUserId(), user.getUserRole(), refreshToken);
+      LoginResponse loginResponse = new LoginResponse(user.getUserId(), user.getUserRole(),accessToken, refreshToken);
 
       return ResponseEntity.status(HttpStatus.CREATED)
               .header(CONTENT_TYPE, APPLICATION_JSON)
-              .header(AUTHORIZATION, BEARER + accessToken)
               .body(ResponseFormat.builder()
                       .status("success")
                       .data(loginResponse)
@@ -73,10 +70,9 @@ public class LoginController {
 
       return  ResponseEntity.status(HttpStatus.CREATED)
               .header(CONTENT_TYPE, APPLICATION_JSON)
-              .header(AUTHORIZATION, BEARER + accessToken)
               .body(ResponseFormat.builder()
                 .status("success")
-                .data(null)
+                .data(accessToken)
                 .message("regenerate access token")
                 .localDateTime(LocalDateTime.now())
                 .build());
