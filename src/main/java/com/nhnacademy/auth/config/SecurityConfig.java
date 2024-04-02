@@ -2,7 +2,6 @@ package com.nhnacademy.auth.config;
 
 import com.nhnacademy.auth.oath.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -16,12 +15,12 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@ConfigurationProperties("spring.security.oauth2.client.registration")
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final OAuthProperties oAuthProperties;
@@ -36,15 +35,9 @@ public class SecurityConfig {
                 .authorizeRequests().anyRequest().permitAll();
 
         // todo: jwt token 부분 추가하는 로직 추가
-        http.oauth2Login()
-                .userInfoEndpoint().userService(customOAuth2UserService());
+        http.oauth2Login();
 
         return http.build();
-    }
-
-    @Bean
-    public CustomOAuth2UserService customOAuth2UserService() {
-        return new CustomOAuth2UserService(oAuth2UserService());
     }
 
     /*
