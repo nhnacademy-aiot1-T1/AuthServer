@@ -11,9 +11,9 @@ import java.util.Optional;
 
 @FeignClient(value = "account-api", path = "/api/account/users")
 public interface AccountAdapter {
-    @GetMapping("/{userId}/login")
-    Response<LoginInfo> getAccountInfo(@PathVariable String userId);
+    @GetMapping("/{id}/login")
+    Response<LoginInfo> getAccountInfo(@PathVariable String id);
 
-    @GetMapping("/{userId}/info")
-    Response<User> getUserInfo(@PathVariable String userId);
+    @GetMapping("/{id}/info")
+    Response<User> getUserInfo(@PathVariable String id);
 }
