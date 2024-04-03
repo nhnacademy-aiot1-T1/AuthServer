@@ -2,7 +2,6 @@ package com.nhnacademy.auth.service.impl;
 
 import com.nhnacademy.auth.adaptor.AccountAdapter;
 import com.nhnacademy.auth.dto.LoginInfo;
-import com.nhnacademy.auth.dto.Response;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.UserIdNotFoundException;
 import com.nhnacademy.auth.service.LoginService;
@@ -16,25 +15,27 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
-    private final AccountAdapter accountAdapter;
-    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Override
-    public boolean match(LoginInfo loginRequest) {
-        LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId()).getData();
-        if (loginInfo == null) {
-            throw new UserIdNotFoundException();
-        }
-        return passwordEncoder.matches(loginRequest.getPassword(), loginInfo.getPassword());
-    }
+  private final AccountAdapter accountAdapter;
+  private final BCryptPasswordEncoder passwordEncoder;
 
-    @Override
-    public User getUser(String userId) {
-        User user = accountAdapter.getUserInfo(userId).getData();
-        if (user == null) {
-            throw new UserIdNotFoundException();
-        }
-        return user;
+  @Override
+  public boolean match(LoginInfo loginRequest) {
+    LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId())
+        .dataOrElseThrow(() -> new RuntimeException());
+    if (loginInfo == null) {
+      throw new UserIdNotFoundException();
     }
+    return passwordEncoder.matches(loginRequest.getPassword(), loginInfo.getPassword());
+  }
+
+  @Override
+  public User getUser(String userId) {
+    User user = accountAdapter.getUserInfo(userId).dataOrElseThrow(() -> new RuntimeException());
+    if (user == null) {
+      throw new UserIdNotFoundException();
+    }
+    return user;
+  }
 
 }
