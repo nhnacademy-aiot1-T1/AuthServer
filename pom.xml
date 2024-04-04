@@ -97,6 +97,13 @@
 			<version>0.11.5</version>
 		</dependency>
 
+<!--ip로 국가 혹은 지역을 찾기 위한 dependency		-->
+		<dependency>
+			<groupId>io.ipgeolocation</groupId>
+			<artifactId>ipgeolocation</artifactId>
+			<version>1.0.16</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
