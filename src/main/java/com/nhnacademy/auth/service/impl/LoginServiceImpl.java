@@ -22,7 +22,7 @@ public class LoginServiceImpl implements LoginService {
   @Override
   public boolean match(LoginInfo loginRequest) {
     LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId())
-        .dataOrElseThrow(() -> new RuntimeException());
+        .dataOrElseThrow(RuntimeException::new);
     if (loginInfo == null) {
       throw new UserIdNotFoundException();
     }
@@ -31,7 +31,7 @@ public class LoginServiceImpl implements LoginService {
 
   @Override
   public User getUser(String userId) {
-    User user = accountAdapter.getUserInfo(userId).dataOrElseThrow(() -> new RuntimeException());
+    User user = accountAdapter.getUserInfo(userId).dataOrElseThrow(RuntimeException::new);
     if (user == null) {
       throw new UserIdNotFoundException();
     }
