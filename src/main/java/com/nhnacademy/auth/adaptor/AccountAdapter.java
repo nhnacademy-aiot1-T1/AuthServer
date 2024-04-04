@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(value = "ACCOUNT-SERVICE", path = "/api/users")
 public interface AccountAdapter {
-    @GetMapping("/{id}/auth")
-    CommonResponse<LoginInfo> getAccountInfo(@PathVariable String id);
 
-    @GetMapping("/{id}/info")
-    CommonResponse<User> getUserInfo(@PathVariable String id);
+  @GetMapping("/{id}/auth")
+  CommonResponse<LoginInfo> getAccountInfo(@PathVariable String id);
+
+  @GetMapping("/{id}/info")
+  CommonResponse<User> getUserInfo(@PathVariable String id);
 }
