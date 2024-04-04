@@ -15,18 +15,27 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
-    private final AccountAdapter accountAdapter;
-    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Override
-    public boolean match(LoginInfo loginRequest) {
-        LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId()).orElseThrow(UserIdNotFoundException::new);
-        return passwordEncoder.matches(loginRequest.getPassword(), loginInfo.getPassword());
-    }
+  private final AccountAdapter accountAdapter;
+  private final BCryptPasswordEncoder passwordEncoder;
 
-    @Override
-    public User getUser(String userId) {
-        return accountAdapter.getUserInfo(userId);
+  @Override
+  public boolean match(LoginInfo loginRequest) {
+    LoginInfo loginInfo = accountAdapter.getAccountInfo(loginRequest.getId())
+        .dataOrElseThrow(() -> new RuntimeException());
+    if (loginInfo == null) {
+      throw new UserIdNotFoundException();
     }
+    return passwordEncoder.matches(loginRequest.getPassword(), loginInfo.getPassword());
+  }
+
+  @Override
+  public User getUser(String userId) {
+    User user = accountAdapter.getUserInfo(userId).dataOrElseThrow(() -> new RuntimeException());
+    if (user == null) {
+      throw new UserIdNotFoundException();
+    }
+    return user;
+  }
 
 }
