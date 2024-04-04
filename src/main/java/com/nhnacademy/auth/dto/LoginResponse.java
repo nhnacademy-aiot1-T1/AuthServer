@@ -11,5 +11,6 @@ import lombok.Getter;
 public class LoginResponse {
 
   String userId;
+  UserRole userRole;
   String accessToken;
 }
