@@ -1,13 +1,14 @@
 package com.nhnacademy.auth.service;
 
+import com.nhnacademy.auth.dto.User;
+
 public interface JwtTokenService {
-    String generateAccessToken(String userId);
 
-    String generateRefreshToken(String userId);
+  String generateAccessToken(User user, String ip);
 
-    String createJwtToken (String userId, int expiredTime);
+  String createJwtToken(String userId, String userRole, String ip, int expiredTime);
 
-    String regenerateAccessToken(String refreshToken);
+  String generateJwtTokenFromMobile(User user, String ip);
 
-    boolean checkRefreshToken(String refreshToken);
+  String regenerateAccessToken(String nowIp, String legacyAccessToken);
 }

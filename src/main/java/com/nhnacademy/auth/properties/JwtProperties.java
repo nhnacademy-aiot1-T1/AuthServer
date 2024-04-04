@@ -10,8 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
-    private String secret;
-    private Integer expirationTime;
-    private String tokenPrefix;
-    private String headerString;
+
+  private String secret;
+  private Integer expirationTime;
+  private String tokenPrefix;
+  private String headerString;
 }
