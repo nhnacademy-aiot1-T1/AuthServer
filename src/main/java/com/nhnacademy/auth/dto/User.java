@@ -7,7 +7,17 @@ import lombok.Getter;
  */
 @Getter
 public class User {
-    String id;
-    UserStatus status;
-    UserRole role;
+    private String id;
+    private Status status;
+    private Role role;
+
+    public enum Status {
+        ADMIN,
+        USER
+    }
+
+    public enum Role {
+        ACTIVE,
+        DEACTIVATE
+    }
 }
