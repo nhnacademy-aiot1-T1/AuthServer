@@ -9,17 +9,28 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class User {
-    private String id;
-    private Status status;
-    private Role role;
 
-    public enum Status {
-        ADMIN,
-        USER
-    }
+  private String id;
+  private Status status;
+  private Role role;
 
-    public enum Role {
-        ACTIVE,
-        DEACTIVATE
-    }
+  /**
+   * User status 2종.
+   * <li> ADMIN
+   * <li> USER
+   */
+  public enum Status {
+    ADMIN,
+    USER
+  }
+
+  /**
+   * User Role 2종.
+   * <li> ACTIVE
+   * <li> DEACTIVATE
+   */
+  public enum Role {
+    ACTIVE,
+    DEACTIVATE
+  }
 }
