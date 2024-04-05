@@ -10,5 +10,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class LoginResponse {
   private String userId;
+  private User.Role role;
   private String accessToken;
 }
