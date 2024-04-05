@@ -33,7 +33,7 @@ class JwtTokenServiceImplTest {
   void setUp() {
     id = "id";
     ip = "112.216.11.34";
-    legacyAccessToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJpZCIsInVzZXJSb2xlIjoiQUNUSVZFIiwidXNlcklwIjoiMjc2ZGYyMjE5NzdkNjBlZTA2NDU0ZDkwNWE3OWFmNmU0YmE4YzdlOTk4OWIxYWJkYzY2MzU0NTcyMmY0YjkxZSIsImlhdCI6MTcxMjMyMDg3NSwiZXhwIjoxNzEyMzIzODc1fQ.iDz6kDg0iTiIXvgLa9smsHbDTApYi0jLPAXcOU4PNs4";
+    legacyAccessToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJpZCIsInVzZXJSb2xlIjoiQUNUSVZFIiwidXNlcklwIjoiMjc2ZGYyMjE5NzdkNjBlZTA2NDU0ZDkwNWE3OWFmNmU0YmE4YzdlOTk4OWIxYWJkYzY2MzU0NTcyMmY0YjkxZSIsImlhdCI6MTcxMjMyMjAzMCwiZXhwIjoxNzEyMzI1MDMwfQ.Zey_LjHnTTYmwNtIvC0zv508iPFTxyC3qW646v71IVU";
   }
 
   @Test
