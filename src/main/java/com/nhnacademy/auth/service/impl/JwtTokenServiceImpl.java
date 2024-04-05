@@ -1,8 +1,11 @@
 package com.nhnacademy.auth.service.impl;
 
 import com.nhnacademy.auth.dto.User;
+import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.properties.JwtProperties;
+import com.nhnacademy.auth.repository.AccessTokenRepository;
+import com.nhnacademy.auth.service.AccessTokenService;
 import com.nhnacademy.auth.service.IpGeolationService;
 import com.nhnacademy.auth.service.JwtTokenService;
 import io.jsonwebtoken.Claims;
@@ -28,13 +31,18 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
   private final IpGeolationService ipGeolationService;
 
+  private final AccessTokenService accessTokenService;
+
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
   private static final int EXPIRED_TIME_MINUTE = 5;
 
 
   @Override
   public String generateAccessToken(User user, String ip) {
-    return createJwtToken(user.getId(), user.getRole().toString(), ip, EXPIRED_TIME_MINUTE);
+    String accessToken = createJwtToken(user.getId(), user.getRole().toString(), ip, EXPIRED_TIME_MINUTE);
+    accessTokenService.saveAccessToken(accessToken, ip);
+    return accessToken;
   }
 
   /**
@@ -77,10 +85,17 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     String userIp = getEncodeIpFromJwtToken(legacyAccessToken);
 
     if (checkAccessTokenIp(userIp, nowIp)) {
-      return createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
+      String newAccessToken = createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
+      if (accessTokenService.getAccessToken(legacyAccessToken)) {
+        accessTokenService.updateAccessToken(legacyAccessToken, newAccessToken);
+        return newAccessToken;
+      } else {
+        throw new AccessTokenNotFoundException();
+      }
     }
     throw new IpIsNotEqualsException();
   }
+
 
   private boolean checkAccessTokenIp(String legacyIp, String nowIp) {
     return legacyIp.equals(nowIp);
