@@ -1,5 +1,6 @@
 package com.nhnacademy.auth.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.LoginResponse;
@@ -111,7 +112,7 @@ public class LoginController {
    */
   @PostMapping(value = "/regenerate")
   public ResponseEntity<CommonResponse<String>> regenerateAccessToken(@RequestBody
-      RegenerateAccessTokenDto regenerateAccessTokenDto) {
+      RegenerateAccessTokenDto regenerateAccessTokenDto) throws JsonProcessingException {
 
     String regenerateAccessToken = jwtTokenService.regenerateAccessToken(
         regenerateAccessTokenDto.getIp(),
