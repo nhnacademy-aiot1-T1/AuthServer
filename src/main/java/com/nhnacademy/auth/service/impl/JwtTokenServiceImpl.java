@@ -1,7 +1,12 @@
 package com.nhnacademy.auth.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.Serializers.Base;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
+import com.nhnacademy.auth.dto.LoginResponse;
 import com.nhnacademy.auth.dto.User;
+import com.nhnacademy.auth.dto.testDto;
 import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.properties.JwtProperties;
@@ -12,7 +17,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.netty.handler.codec.base64.Base64Decoder;
 import java.io.IOException;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
@@ -81,11 +89,13 @@ public class JwtTokenServiceImpl implements JwtTokenService {
   }
 
   @Override
-  public String regenerateAccessToken(String nowIp, String legacyAccessToken) {
+  public String regenerateAccessToken(String nowIp, String legacyAccessToken)
+      throws JsonProcessingException {
+
+    String encodeIp = DigestUtils.sha256Hex(nowIp);
     String userId = getUserIdFromJwtToken(legacyAccessToken);
     String userRole = getUserRoleFromJwtToken(legacyAccessToken);
     String userIp = getEncodeIpFromJwtToken(legacyAccessToken);
-    String encodeIp = DigestUtils.sha256Hex(nowIp);
 
     if (checkAccessTokenIp(userIp, encodeIp)) {
       String newAccessToken = createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
@@ -104,34 +114,23 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     return legacyIp.equals(nowIp);
   }
 
-  private String getEncodeIpFromJwtToken(String token) {
-    Claims claims = Jwts.parser()
-        .setSigningKey(jwtProperties.getSecret())
-        .parseClaimsJws(token)
-        .getBody();
-
-    return claims.get("userIp", String.class);
+  private String getEncodeIpFromJwtToken(String token) throws JsonProcessingException {
+    return parsing(token).getUserIp();
   }
 
-  private String getUserIdFromJwtToken(String token) {
-    JwtParser claims = Jwts.parser()
-        .setSigningKey(jwtProperties.getSecret());
-    log.info("claims :{}", claims);
-
-    var parse = claims.parseClaimsJws(token);
-    log.info("parse is : {}", parse.getBody().toString());
-    var body = parse.getBody();
-    log.info("body is : {}", body.toString());
-
-    return body.get("userId", String.class);
+  private String getUserIdFromJwtToken(String token) throws JsonProcessingException {
+    return parsing(token).getUserId();
   }
 
-  private String getUserRoleFromJwtToken(String token) {
-    Claims claims = Jwts.parser()
-        .setSigningKey(jwtProperties.getSecret())
-        .parseClaimsJws(token)
-        .getBody();
+  private String getUserRoleFromJwtToken(String token) throws JsonProcessingException {
+    return parsing(token).getUserRole();
+  }
 
-    return claims.get("userRole", String.class);
+  private testDto parsing(String token) throws JsonProcessingException {
+    String encodePayload = token.split("\\.")[1];
+    String decode= new String(Base64.getDecoder().decode(encodePayload));
+    ObjectMapper objectMapper = new ObjectMapper();
+    testDto a = objectMapper.readValue(decode, testDto.class);
+    return a;
   }
 }
