@@ -86,7 +86,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
     if (checkAccessTokenIp(userIp, nowIp)) {
       String newAccessToken = createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
-      if (accessTokenService.getAccessToken(legacyAccessToken)) {
+      if (accessTokenService.findAccessToken(legacyAccessToken)) {
         accessTokenService.updateAccessToken(legacyAccessToken, newAccessToken);
         return newAccessToken;
       } else {

@@ -1,6 +1,5 @@
 package com.nhnacademy.auth.controller;
 
-import com.nhnacademy.auth.dto.CommonResponse;
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.LoginResponse;
 import com.nhnacademy.auth.dto.RegenerateAccessTokenDto;
@@ -8,6 +7,7 @@ import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.service.JwtTokenService;
 import com.nhnacademy.auth.service.LoginService;
+import com.nhnacademy.common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,7 +61,7 @@ public class LoginController {
     String accessToken = jwtTokenService.generateAccessToken(user, info.getIp());
 
     log.error("in login", accessToken);
-    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getRole(), accessToken);
+    LoginResponse loginResponse = new LoginResponse(user.getId(), accessToken);
 
     log.info("login response dto is : {}, :{}", loginResponse.getUserId(),
         loginResponse.getAccessToken());

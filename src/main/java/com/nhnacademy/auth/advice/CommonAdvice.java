@@ -1,9 +1,9 @@
 package com.nhnacademy.auth.advice;
 
-import com.nhnacademy.auth.dto.CommonResponse;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.exception.UserIdNotFoundException;
+import com.nhnacademy.common.dto.CommonResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

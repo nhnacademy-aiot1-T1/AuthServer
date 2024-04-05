@@ -19,8 +19,8 @@ public class AccessTokenServiceImpl implements AccessTokenService {
   }
 
   @Override
-  public AccessToken saveAccessToken(AccessToken accessToken) {
-    AccessToken newAccessToken = new AccessToken(accessToken.getToken(), accessToken.getIp());
+  public AccessToken saveAccessToken(String accessToken, String ip) {
+    AccessToken newAccessToken = new AccessToken(accessToken, ip);
     return accessTokenRepository.save(newAccessToken);
   }
 
