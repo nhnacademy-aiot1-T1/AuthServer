@@ -1,6 +1,8 @@
 package com.nhnacademy.auth.service;
 
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.User;
+import java.io.IOException;
 
 public interface JwtTokenService {
 
@@ -8,7 +10,7 @@ public interface JwtTokenService {
 
   String createJwtToken(String userId, String userRole, String ip, int expiredTime);
 
-  String generateJwtTokenFromMobile(User user, String ip);
+  String generateJwtTokenFromMobile(User user, String ip) throws IOException, GeoIp2Exception;
 
   String regenerateAccessToken(String nowIp, String legacyAccessToken);
 }

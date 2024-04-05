@@ -1,21 +1,24 @@
 package com.nhnacademy.auth.service.impl;
 
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.properties.JwtProperties;
-import com.nhnacademy.auth.repository.AccessTokenRepository;
 import com.nhnacademy.auth.service.AccessTokenService;
 import com.nhnacademy.auth.service.IpGeolationService;
 import com.nhnacademy.auth.service.JwtTokenService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Date;
 
@@ -33,14 +36,12 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
   private final AccessTokenService accessTokenService;
 
-  private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-  private static final int EXPIRED_TIME_MINUTE = 5;
-
+  private static final int EXPIRED_TIME_MINUTE = 50;
 
   @Override
   public String generateAccessToken(User user, String ip) {
-    String accessToken = createJwtToken(user.getId(), user.getRole().toString(), ip, EXPIRED_TIME_MINUTE);
+    String accessToken = createJwtToken(user.getId(), user.getRole().toString(), ip,
+        EXPIRED_TIME_MINUTE);
     accessTokenService.saveAccessToken(accessToken, ip);
     return accessToken;
   }
@@ -54,14 +55,14 @@ public class JwtTokenServiceImpl implements JwtTokenService {
    */
   @Override
   public String createJwtToken(String userId, String userRole, String ip, int expiredTime) {
-    String encodeIp = bCryptPasswordEncoder.encode(ip);
+    String encodeIp = DigestUtils.sha256Hex(ip);
 
     Claims claims = Jwts.claims();
     claims.put("userId", userId);
     claims.put("userRole", userRole);
     claims.put("userIp", encodeIp);
 
-    log.error("claims", claims);
+    log.warn("claims", claims);
     Date now = new Date();
 
     return Jwts.builder()
@@ -73,7 +74,8 @@ public class JwtTokenServiceImpl implements JwtTokenService {
   }
 
   @Override
-  public String generateJwtTokenFromMobile(User user, String ip) {
+  public String generateJwtTokenFromMobile(User user, String ip)
+      throws IOException, GeoIp2Exception {
     String mobileIpCountry = ipGeolationService.getContury(ip);
     return generateAccessToken(user, mobileIpCountry);
   }
@@ -83,8 +85,9 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     String userId = getUserIdFromJwtToken(legacyAccessToken);
     String userRole = getUserRoleFromJwtToken(legacyAccessToken);
     String userIp = getEncodeIpFromJwtToken(legacyAccessToken);
+    String encodeIp = DigestUtils.sha256Hex(nowIp);
 
-    if (checkAccessTokenIp(userIp, nowIp)) {
+    if (checkAccessTokenIp(userIp, encodeIp)) {
       String newAccessToken = createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
       if (accessTokenService.findAccessToken(legacyAccessToken)) {
         accessTokenService.updateAccessToken(legacyAccessToken, newAccessToken);
@@ -111,12 +114,16 @@ public class JwtTokenServiceImpl implements JwtTokenService {
   }
 
   private String getUserIdFromJwtToken(String token) {
-    Claims claims = Jwts.parser()
-        .setSigningKey(jwtProperties.getSecret())
-        .parseClaimsJws(token)
-        .getBody();
+    JwtParser claims = Jwts.parser()
+        .setSigningKey(jwtProperties.getSecret());
+    log.info("claims :{}", claims);
 
-    return claims.get("userId", String.class);
+    var parse = claims.parseClaimsJws(token);
+    log.info("parse is : {}", parse.getBody().toString());
+    var body = parse.getBody();
+    log.info("body is : {}", body.toString());
+
+    return body.get("userId", String.class);
   }
 
   private String getUserRoleFromJwtToken(String token) {
