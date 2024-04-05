@@ -45,19 +45,18 @@ public class LoginController {
 
   /**
    * <li>로그인에 성공했을 경우 : userId, userRole, accessToken 발급.
-   * <p>
    * <li>로그인에 실패했을 경우 : exception.
-   * </p>
-   *
+   * <li> 단위 test 돌릴 때에는, 아래의 if문 주석처리 하고 돌려야 작동함.
+   * <p>
    * @param info : id, password, ip
    * @return : LoginResponse
    * @Exception : PasswordNotMatchException(userId)
    */
   @PostMapping("/pc")
   public ResponseEntity<CommonResponse<LoginResponse>> login(@RequestBody LoginInfo info) {
-//    if (!loginService.match(info)) {
-//      throw new PasswordNotMatchException(info.getId());
-//    }
+    if (!loginService.match(info)) {
+      throw new PasswordNotMatchException(info.getId());
+    }
 
     User user = loginService.getUser(info.getId());
     String accessToken = jwtTokenService.generateAccessToken(user, info.getIp());
