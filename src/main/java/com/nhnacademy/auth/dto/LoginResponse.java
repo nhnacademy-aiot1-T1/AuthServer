@@ -9,7 +9,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class LoginResponse {
-
-  String userId;
-  String accessToken;
+  private String userId;
+  private String accessToken;
 }
