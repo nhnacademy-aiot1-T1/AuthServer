@@ -1,10 +1,10 @@
 package com.nhnacademy.auth.service.impl;
 
-import com.nhnacademy.auth.properties.IpGeoProperties;
+import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.service.IpGeolationService;
-import io.ipgeolocation.api.Geolocation;
-import io.ipgeolocation.api.GeolocationParams;
-import io.ipgeolocation.api.IPGeolocationAPI;
+import java.io.IOException;
+import java.net.InetAddress;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,23 +18,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class IpGeolocationServiceImpl implements IpGeolationService {
 
-  private final IpGeoProperties ipGeoProperties;
+  private final DatabaseReader databaseReader;
 
   @Override
-  public String getContury(String ip) {
-
-    GeolocationParams geolocationParams = GeolocationParams.builder()
-        .withIPAddress(ip)
-        .withFields("geo, time_zone, currency")
-        .includeSecurity()
-        .build();
-
-    Geolocation geolocation = new IPGeolocationAPI(ipGeoProperties.getSecret()).getGeolocation(
-        geolocationParams);
-
-    if (geolocation.getStateCode().equals("200")) {
-      return geolocation.getCountryName();
-    }
-    return null;
+  public String getContury(String ip) throws IOException, GeoIp2Exception {
+    InetAddress inetAddress = InetAddress.getByName(ip);
+    String conturyIp = databaseReader.country(inetAddress).getCountry().getIsoCode();
+    System.out.printf("%s{}", conturyIp);
+    return conturyIp;
   }
 }
