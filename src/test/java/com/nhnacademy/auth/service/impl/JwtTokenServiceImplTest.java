@@ -2,6 +2,7 @@ package com.nhnacademy.auth.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.dto.User.Role;
@@ -24,9 +25,6 @@ class JwtTokenServiceImplTest {
   @Autowired
   private JwtTokenServiceImpl jwtTokenService;
 
-  @Autowired
-  private JwtProperties properties;
-
   private String id;
   private String ip;
   private String legacyAccessToken;
@@ -35,15 +33,13 @@ class JwtTokenServiceImplTest {
   void setUp() {
     id = "id";
     ip = "112.216.11.34";
-    legacyAccessToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJpZCIsInVzZXJSb2xlIjoiQUNUSVZFIiwidXNlcklwIjoiMjc2ZGYyMjE5NzdkNjBlZTA2NDU0ZDkwNWE3OWFmNmU0YmE4YzdlOTk4OWIxYWJkYzY2MzU0NTcyMmY0YjkxZSIsImlhdCI6MTcxMjMxNTY1MSwiZXhwIjoxNzEyMzE4NjUxfQ.IpU94Fi7iCFTIHz82qUxz3z2ao4I7qYOoZlQn6Tragc";
+    legacyAccessToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJpZCIsInVzZXJSb2xlIjoiQUNUSVZFIiwidXNlcklwIjoiMjc2ZGYyMjE5NzdkNjBlZTA2NDU0ZDkwNWE3OWFmNmU0YmE4YzdlOTk4OWIxYWJkYzY2MzU0NTcyMmY0YjkxZSIsImlhdCI6MTcxMjMyMDg3NSwiZXhwIjoxNzEyMzIzODc1fQ.iDz6kDg0iTiIXvgLa9smsHbDTApYi0jLPAXcOU4PNs4";
   }
 
   @Test
   void generateAccessToken() {
     User user = new User(id, Status.USER, Role.ACTIVE);
     String accessToken = jwtTokenService.generateAccessToken(user, ip);
-    Object o = Jwts.parser().setSigningKey(properties.getSecret()).parseClaimsJws(accessToken);
-    log.warn(accessToken);
     assertNotNull(accessToken);
   }
 
@@ -56,7 +52,7 @@ class JwtTokenServiceImplTest {
   }
 
   @Test
-  void regenerateAccessToken(){
+  void regenerateAccessToken() throws JsonProcessingException {
     String regenerateAccessToken = jwtTokenService.regenerateAccessToken("112.216.11.34", legacyAccessToken);
     log.warn(regenerateAccessToken);
     assertNotNull(regenerateAccessToken);

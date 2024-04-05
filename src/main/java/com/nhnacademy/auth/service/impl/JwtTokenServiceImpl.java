@@ -2,11 +2,9 @@ package com.nhnacademy.auth.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.Serializers.Base;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
-import com.nhnacademy.auth.dto.LoginResponse;
 import com.nhnacademy.auth.dto.User;
-import com.nhnacademy.auth.dto.testDto;
+import com.nhnacademy.auth.dto.JwtPayloadDto;
 import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.properties.JwtProperties;
@@ -14,13 +12,10 @@ import com.nhnacademy.auth.service.AccessTokenService;
 import com.nhnacademy.auth.service.IpGeolationService;
 import com.nhnacademy.auth.service.JwtTokenService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.netty.handler.codec.base64.Base64Decoder;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.Base64.Decoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
@@ -126,11 +121,11 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     return parsing(token).getUserRole();
   }
 
-  private testDto parsing(String token) throws JsonProcessingException {
+  private JwtPayloadDto parsing(String token) throws JsonProcessingException {
     String encodePayload = token.split("\\.")[1];
     String decode= new String(Base64.getDecoder().decode(encodePayload));
     ObjectMapper objectMapper = new ObjectMapper();
-    testDto a = objectMapper.readValue(decode, testDto.class);
+    JwtPayloadDto a = objectMapper.readValue(decode, JwtPayloadDto.class);
     return a;
   }
 }
