@@ -1,5 +1,6 @@
 package com.nhnacademy.auth.controller;
 
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.LoginResponse;
 import com.nhnacademy.auth.dto.RegenerateAccessTokenDto;
@@ -8,6 +9,7 @@ import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.service.JwtTokenService;
 import com.nhnacademy.auth.service.LoginService;
 import com.nhnacademy.common.dto.CommonResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -53,15 +55,15 @@ public class LoginController {
    */
   @PostMapping("/pc")
   public ResponseEntity<CommonResponse<LoginResponse>> login(@RequestBody LoginInfo info) {
-    if (!loginService.match(info)) {
-      throw new PasswordNotMatchException(info.getId());
-    }
+//    if (!loginService.match(info)) {
+//      throw new PasswordNotMatchException(info.getId());
+//    }
 
     User user = loginService.getUser(info.getId());
     String accessToken = jwtTokenService.generateAccessToken(user, info.getIp());
 
     log.error("in login", accessToken);
-    LoginResponse loginResponse = new LoginResponse(user.getId(), accessToken);
+    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getRole(), accessToken);
 
     log.info("login response dto is : {}, :{}", loginResponse.getUserId(),
         loginResponse.getAccessToken());
@@ -82,7 +84,8 @@ public class LoginController {
    * @Exception : PasswordNotMatchException(userId)
    */
   @PostMapping("/mobile")
-  public ResponseEntity<CommonResponse<LoginResponse>> loginMobile(@RequestBody LoginInfo info) {
+  public ResponseEntity<CommonResponse<LoginResponse>> loginMobile(@RequestBody LoginInfo info)
+      throws IOException, GeoIp2Exception {
     if (!loginService.match(info)) {
       throw new PasswordNotMatchException(info.getId());
     }
