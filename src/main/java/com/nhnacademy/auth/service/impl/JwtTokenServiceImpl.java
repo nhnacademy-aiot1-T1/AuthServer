@@ -6,6 +6,7 @@ import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.dto.JwtPayloadDto;
 import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
+import com.nhnacademy.auth.exception.ExpiredJwtTokenException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.properties.JwtProperties;
 import com.nhnacademy.auth.service.AccessTokenService;
@@ -91,17 +92,23 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     String userId = getUserIdFromJwtToken(legacyAccessToken);
     String userRole = getUserRoleFromJwtToken(legacyAccessToken);
     String userIp = getEncodeIpFromJwtToken(legacyAccessToken);
+    String expTime = getExpiredTimeFromJwtToken(legacyAccessToken);
+    long legacyAccessTokenExp = Long.parseLong(expTime);
+    long now = System.currentTimeMillis();
+    long nowSecodns = now / 1000;
 
-    if (checkAccessTokenIp(userIp, encodeIp)) {
-      String newAccessToken = createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
-      if (accessTokenService.findAccessToken(legacyAccessToken)) {
-        accessTokenService.updateAccessToken(legacyAccessToken, newAccessToken);
-        return newAccessToken;
-      } else {
-        throw new AccessTokenNotFoundException();
-      }
+    if (!checkAccessTokenIp(userIp, encodeIp)) {
+      throw new IpIsNotEqualsException();
     }
-    throw new IpIsNotEqualsException();
+    if (legacyAccessTokenExp < nowSecodns) {
+      throw new ExpiredJwtTokenException();
+    }
+    if (!accessTokenService.findAccessToken(legacyAccessToken)) {
+      throw new AccessTokenNotFoundException();
+    }
+    String newAccessToken = createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
+    accessTokenService.updateAccessToken(legacyAccessToken, newAccessToken);
+    return newAccessToken;
   }
 
 
@@ -121,9 +128,13 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     return parsing(token).getUserRole();
   }
 
+  private String getExpiredTimeFromJwtToken(String token) throws JsonProcessingException {
+    return parsing(token).getExp();
+  }
+
   private JwtPayloadDto parsing(String token) throws JsonProcessingException {
     String encodePayload = token.split("\\.")[1];
-    String decode= new String(Base64.getDecoder().decode(encodePayload));
+    String decode = new String(Base64.getDecoder().decode(encodePayload));
     ObjectMapper objectMapper = new ObjectMapper();
     JwtPayloadDto a = objectMapper.readValue(decode, JwtPayloadDto.class);
     return a;
