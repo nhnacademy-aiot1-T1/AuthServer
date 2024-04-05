@@ -3,6 +3,7 @@ package com.nhnacademy.auth.service.impl;
 import com.nhnacademy.auth.domain.AccessToken;
 import com.nhnacademy.auth.repository.AccessTokenRepository;
 import com.nhnacademy.auth.service.AccessTokenService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +27,11 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
   @Override
   public boolean updateAccessToken(String legacyAccessToken, String accessToken) {
-    String value = accessTokenRepository.findByToken(legacyAccessToken);
+    Optional<AccessToken> value = accessTokenRepository.findById(legacyAccessToken);
     if (findAccessToken(legacyAccessToken)) {
       deleteAccessToken(legacyAccessToken);
-      accessTokenRepository.save(new AccessToken(accessToken, value));
+      accessTokenRepository.flush();
+      accessTokenRepository.save(new AccessToken(accessToken, value.get().getIp()));
       return true;
     }
     return false;
@@ -37,6 +39,6 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
   @Override
   public void deleteAccessToken(String accessToken) {
-    accessTokenRepository.deleteById(accessToken);
+      accessTokenRepository.deleteById(accessToken);
   }
 }

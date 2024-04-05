@@ -12,5 +12,4 @@ public interface AccessTokenService {
   boolean updateAccessToken(String legacyAccessToken, String accessToken);
 
   void deleteAccessToken(String accessToken);
-
 }
