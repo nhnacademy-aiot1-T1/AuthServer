@@ -14,6 +14,8 @@ import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +39,8 @@ class JwtTokenServiceImplTest {
   }
 
   @Test
+  @DisplayName("generate access token in pc")
+  @Order(1)
   void generateAccessToken() {
     User user = new User(id, Status.USER, Role.ACTIVE);
     String accessToken = jwtTokenService.generateAccessToken(user, ip);
@@ -44,6 +48,8 @@ class JwtTokenServiceImplTest {
   }
 
   @Test
+  @DisplayName("generate access token in mobile")
+  @Order(2)
   void generateJwtTokenFromMobile() throws IOException, GeoIp2Exception {
     User user = new User(id, Status.USER, Role.ACTIVE);
     String generateJwtTokenFromMobile = jwtTokenService.generateJwtTokenFromMobile(user, ip);
@@ -52,6 +58,8 @@ class JwtTokenServiceImplTest {
   }
 
   @Test
+  @DisplayName("regenerate access token")
+  @Order(3)
   void regenerateAccessToken() throws JsonProcessingException {
     String regenerateAccessToken = jwtTokenService.regenerateAccessToken("112.216.11.34", legacyAccessToken);
     log.warn(regenerateAccessToken);
