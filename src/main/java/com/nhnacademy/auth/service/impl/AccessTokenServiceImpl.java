@@ -39,6 +39,6 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
   @Override
   public void deleteAccessToken(String accessToken) {
-      accessTokenRepository.deleteById(accessToken);
+    accessTokenRepository.deleteById(accessToken);
   }
 }
