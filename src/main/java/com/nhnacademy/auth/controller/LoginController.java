@@ -14,6 +14,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,7 +42,7 @@ public class LoginController {
   private final JwtTokenService jwtTokenService;
 
   private static final String CONTENT_TYPE = "Content-Type";
-  private static final String APPLICATION_JSON = "application/json";
+  private static final String APPLICATION_JSON = MediaType.APPLICATION_JSON_VALUE;
   private static final String SUCCESS = "success";
 
   /**
