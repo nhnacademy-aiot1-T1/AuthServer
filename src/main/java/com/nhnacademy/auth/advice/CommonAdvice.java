@@ -26,7 +26,7 @@ public class CommonAdvice {
       IpIsNotEqualsException.class,
       AccessTokenNotFoundException.class,
       ExpiredJwtException.class})
-  public ResponseEntity<CommonResponse<RuntimeException>> passwordNotMatch(RuntimeException e) {
+  public ResponseEntity<CommonResponse<RuntimeException>> authorizationFailureHandler(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(CommonResponse.fail(e.getMessage()));
   }
