@@ -29,7 +29,7 @@ public class OAuthLoginController {
      *
      * todo: front단으로 이동
      */
-    @GetMapping("/login/oauth/payco")
+    @GetMapping("/api/auth/login/payco/1")
     public ResponseEntity<String> oauthLogin() {
         String url =  "https://id.payco.com/oauth2.0/authorize?response_type=code&serviceProviderCode=FRIENDS&userLocale=ko_KR";
 
@@ -50,7 +50,7 @@ public class OAuthLoginController {
      *
      * ref - https://developers.payco.com/guide/development/apply/web
      */
-    @GetMapping("/login/oauth/a")
+    @GetMapping("/api/auth/login/payco")
     public ResponseEntity<CommonResponse<LoginResponse>> getUserResource(@RequestParam String code) {
         String url = "https://id.payco.com/oauth2.0/token?grant_type=authorization_code"
                 + "&client_id=" + paycoOAuthProperties.getClientId()
@@ -74,6 +74,8 @@ public class OAuthLoginController {
         String token = jwtTokenService.generateAccessToken(userInfo.getBody().getIdNo()); // id 값은 항상 보장되어 있는 값
         LoginResponse loginResponse = new LoginResponse(userInfo.getBody().getIdNo(), User.Role.USER, token);
 
-        return ResponseEntity.ok().body(CommonResponse.success(loginResponse));
+        return ResponseEntity
+                .ok()
+                .body(CommonResponse.success(loginResponse));
     }
 }
