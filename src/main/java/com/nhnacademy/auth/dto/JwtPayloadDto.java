@@ -9,5 +9,4 @@ public class JwtPayloadDto {
   private String userIp;
   private String iat;
   private String exp;
-
 }
