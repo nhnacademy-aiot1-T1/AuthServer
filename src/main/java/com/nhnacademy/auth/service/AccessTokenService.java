@@ -7,7 +7,7 @@ public interface AccessTokenService {
 
   boolean findAccessToken(String accessToken);
 
-  AccessToken saveAccessToken(String accessToken, String ip);
+  AccessToken saveAccessToken(String accessToken, String ip, String userId);
 
   boolean updateAccessToken(String legacyAccessToken, String accessToken);
 
