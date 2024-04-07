@@ -1,23 +1,40 @@
 package com.nhnacademy.auth.controller;
 
-import com.nhnacademy.auth.dto.CommonResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.LoginResponse;
+import com.nhnacademy.auth.dto.RegenerateAccessTokenDto;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.service.JwtTokenService;
 import com.nhnacademy.auth.service.LoginService;
+import com.nhnacademy.common.dto.CommonResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+/**
+ * default path : /api/auth/login
+ * <p>
+ * method is :
+ * </p>
+ * <li> login : /pc
+ * <li> loginMobile : /mobile
+ * <li> regenerateAccessToken : /regenerate
+ * rest controller class.
+ */
 @Slf4j
 @RestController
+@RequestMapping("/api/auth/login")
 @RequiredArgsConstructor
 public class LoginController {
 
@@ -25,46 +42,85 @@ public class LoginController {
   private final JwtTokenService jwtTokenService;
 
   private static final String CONTENT_TYPE = "Content-Type";
-  private static final String APPLICATION_JSON = "application/json";
+  private static final String APPLICATION_JSON = MediaType.APPLICATION_JSON_VALUE;
+  private static final String SUCCESS = "success";
 
   /**
-   * 로그인에 성공했을 경우 : userId, userRole, accessToken, refreshToken 발급.
+   * <li>로그인에 성공했을 경우 : userId, userRole, accessToken 발급.
+   * <li>로그인에 실패했을 경우 : exception.
+   * <li> 단위 test 돌릴 때에는, 아래의 if문 주석처리 하고 돌려야 작동함.
    * <p>
-   * 로그인에 실패했을 경우 : exception.
-   * </p>
-   *
-   * @param info : gateway에서 들어오는 dataDto
-   * @return : responseFormat
+   * @param info : id, password, ip
+   * @return : LoginResponse
    * @Exception : PasswordNotMatchException(userId)
    */
-  @PostMapping("/api/auth/login")
+  @PostMapping("/pc")
   public ResponseEntity<CommonResponse<LoginResponse>> login(@RequestBody LoginInfo info) {
     if (!loginService.match(info)) {
       throw new PasswordNotMatchException(info.getId());
     }
-    String accessToken = jwtTokenService.generateAccessToken(info.getId());
-    User user = loginService.getUser(info.getId());
 
-    LoginResponse loginResponse = new LoginResponse(user.getId(), accessToken);
-    log.warn("login response dto is : {}, :{}", loginResponse.getUserId(), loginResponse.getAccessToken());
+    User user = loginService.getUser(info.getId());
+    String accessToken = jwtTokenService.generateAccessToken(user, info.getIp());
+
+    log.error("in login", accessToken);
+    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getRole(), accessToken);
+
+    log.info("login response dto is : {}, :{}", loginResponse.getUserId(),
+        loginResponse.getAccessToken());
+
     return ResponseEntity.status(HttpStatus.CREATED)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .body(CommonResponse.success(loginResponse, "로그인 성공"));
+        .body(CommonResponse.success(loginResponse, SUCCESS));
   }
 
   /**
-   * refreshToken이 redis에 있을 경우 : accessToken을 발급.
+   * <li>mobile 환경에서 로그인에 성공했을 경우, 토큰 발급.
    * <p>
-   * refreshToken이 redis에 없을 경우 : Service layer에서 exception.
-   * @param refreshToken : 검색 대상자.
-   * @return : responseFormat
+   * <li>로그인에 실패했을 경우: exception
+   * </p>
+   *
+   * @param info : id, password, ip
+   * @return : LoginResponse
+   * @Exception : PasswordNotMatchException(userId)
    */
-//    @PostMapping(value = "/regenerate")
-//    public ResponseEntity<Response<String>> regenerateAccessToken(@RequestBody String refreshToken) {
-//        String accessToken = jwtTokenService.regenerateAccessToken(refreshToken);
-//
-//        return  ResponseEntity.status(HttpStatus.CREATED)
-//                .header(CONTENT_TYPE, APPLICATION_JSON)
-//                .body(Response.success(accessToken, "regenerate access token"));
-//    }
+  @PostMapping("/mobile")
+  public ResponseEntity<CommonResponse<LoginResponse>> loginMobile(@RequestBody LoginInfo info)
+      throws IOException, GeoIp2Exception {
+    if (!loginService.match(info)) {
+      throw new PasswordNotMatchException(info.getId());
+    }
+
+    User user = loginService.getUser(info.getId());
+    String accessToken = jwtTokenService.generateJwtTokenFromMobile(user, info.getIp());
+
+    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getRole(), accessToken);
+
+    log.info("login response dto is : {}, :{}", loginResponse.getUserId(),
+        loginResponse.getAccessToken());
+
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .header(CONTENT_TYPE, APPLICATION_JSON)
+        .body(CommonResponse.success(loginResponse, SUCCESS));
+  }
+
+  /**
+   * <li> 토큰의 재발급 로직.
+   *
+   * @param regenerateAccessTokenDto : id, ip, legacyAccessToken
+   * @return : String
+   * @Exception : IpIsNotEqualsException
+   */
+  @PostMapping(value = "/regenerate")
+  public ResponseEntity<CommonResponse<String>> regenerateAccessToken(@RequestBody
+      RegenerateAccessTokenDto regenerateAccessTokenDto) throws JsonProcessingException {
+
+    String regenerateAccessToken = jwtTokenService.regenerateAccessToken(
+        regenerateAccessTokenDto.getIp(),
+        regenerateAccessTokenDto.getLegacyAccessToken());
+
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .header(CONTENT_TYPE, APPLICATION_JSON)
+        .body(CommonResponse.success(regenerateAccessToken, SUCCESS));
+  }
 }

@@ -1,37 +1,41 @@
 package com.nhnacademy.auth.advice;
 
-import com.nhnacademy.auth.dto.CommonResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
+import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
-import com.nhnacademy.auth.exception.RefreshTokenNotFoundException;
 import com.nhnacademy.auth.exception.UserIdNotFoundException;
+import com.nhnacademy.common.dto.CommonResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-
+/**
+ * 현재 exception handler만 하는 RestControllerAdvice.
+ * <p>
+ * RuntimeException으로 통일. httpStatus가 401로 동일.
+ * <li> JsonProcessingException 핸들링 추가. http error status는 500
+ * <li>총 6종의 예외 핸들링 중.
+ * </p>
+ */
 @RestControllerAdvice
 public class CommonAdvice {
 
-  @ExceptionHandler(PasswordNotMatchException.class)
-  public ResponseEntity<CommonResponse<PasswordNotMatchException>> passwordNotMatch(
-      PasswordNotMatchException passwordNotMatchException) {
+  @ExceptionHandler(value = {PasswordNotMatchException.class,
+      UserIdNotFoundException.class,
+      IpIsNotEqualsException.class,
+      AccessTokenNotFoundException.class,
+      ExpiredJwtException.class})
+  public ResponseEntity<CommonResponse<RuntimeException>> authorizationFailureHandler(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(CommonResponse.fail("password가 일치하지 않습니다."));
+        .body(CommonResponse.fail(e.getMessage()));
   }
 
-  @ExceptionHandler(RefreshTokenNotFoundException.class)
-  public ResponseEntity<CommonResponse<RefreshTokenNotFoundException>> refreshTokenNotFound(
-      RefreshTokenNotFoundException refreshTokenNotFoundException) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(CommonResponse.fail("refresh token의 인증에 실패하여, access token의 생성이 불가능합니다."));
-  }
-
-  @ExceptionHandler(UserIdNotFoundException.class)
-  public ResponseEntity<CommonResponse<UserIdNotFoundException>> userIdNotFound(
-      UserIdNotFoundException userIdNotFoundException) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(CommonResponse.fail("아이디를 찾을 수 없습니다.."));
+  @ExceptionHandler(JsonProcessingException.class)
+  public ResponseEntity<CommonResponse<RuntimeException>> jsonProcessingExceptionHandler(JsonProcessingException e) {
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(CommonResponse.fail(e.getMessage()));
   }
 }
