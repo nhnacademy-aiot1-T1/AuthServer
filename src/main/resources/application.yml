@@ -1,0 +1,18 @@
+spring:
+  profiles:
+    active: oauth
+  application:
+    name: AUTH-SERVICE
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://192.168.71.99:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+
+jwt:
+  secret: Ny0pm2CWIAST07ElsTAVZgCqJKJd2bE9lpKyewuOhyyKoBApt1Ny0pm2CWIAST07ElsTAVZgCqJKJd2bE9lpKyewuOhyyKoBApt1
+  expiration-time: 3600
+  token-prefix: Bearer
+  header-string: Authorization
