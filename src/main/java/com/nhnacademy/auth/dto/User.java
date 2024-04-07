@@ -11,12 +11,12 @@ public class User {
     private Status status;
     private Role role;
 
-    public enum Status {
+    public enum Role {
         ADMIN,
         USER
     }
 
-    public enum Role {
+    public enum Status {
         ACTIVE,
         DEACTIVATE
     }
