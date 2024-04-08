@@ -30,12 +30,11 @@ public class AccessTokenServiceImpl implements AccessTokenService {
    * param을 받아, mysql에 key, value 값으로 저장.
    *
    * @param accessToken : pk
-   * @param ip
    * @return : AccessToken DTO
    */
   @Override
-  public AccessToken saveAccessToken(String accessToken, String ip) {
-    AccessToken newAccessToken = new AccessToken(accessToken, ip);
+  public AccessToken saveAccessToken(String accessToken, String ip, String userId) {
+    AccessToken newAccessToken = new AccessToken(accessToken, ip, userId);
     return accessTokenRepository.save(newAccessToken);
   }
 
@@ -44,8 +43,6 @@ public class AccessTokenServiceImpl implements AccessTokenService {
    * <li> true : 기존에 있던 토큰을 지우고, flush를 한 뒤, 토큰을 저장.
    * <li> false : return false
    *
-   * @param legacyAccessToken
-   * @param accessToken
    * @return : true, false
    */
   @Override
@@ -59,7 +56,8 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     }
     deleteAccessToken(legacyAccessToken);
     accessTokenRepository.flush();
-    accessTokenRepository.save(new AccessToken(accessToken, value.get().getIp()));
+    accessTokenRepository.save(
+        new AccessToken(accessToken, value.get().getIp(), value.get().getUserId()));
     return true;
   }
 

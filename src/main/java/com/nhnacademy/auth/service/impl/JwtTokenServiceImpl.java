@@ -46,7 +46,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
   public String generateAccessToken(User user, String ip) {
     String accessToken = createJwtToken(user.getId(), user.getRole().toString(), ip,
         EXPIRED_TIME_MINUTE);
-    accessTokenService.saveAccessToken(accessToken, ip);
+    accessTokenService.saveAccessToken(accessToken, ip, user.getId());
     return accessToken;
   }
 
@@ -136,7 +136,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     String encodePayload = token.split("\\.")[1];
     String decode = new String(Base64.getDecoder().decode(encodePayload));
     ObjectMapper objectMapper = new ObjectMapper();
-    JwtPayloadDto a = objectMapper.readValue(decode, JwtPayloadDto.class);
-    return a;
+    return objectMapper.readValue(decode, JwtPayloadDto.class);
   }
 }

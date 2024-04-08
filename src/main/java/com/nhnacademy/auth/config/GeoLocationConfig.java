@@ -1,8 +1,8 @@
 package com.nhnacademy.auth.config;
 
 import com.maxmind.geoip2.DatabaseReader;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,9 @@ public class GeoLocationConfig {
   @Bean("databaseReader")
   public DatabaseReader databaseReader() throws IOException {
 
-    return new DatabaseReader.Builder(new File(
-        Objects.requireNonNull(getClass().getClassLoader().getResource("GeoLite2-Country.mmdb")).getFile())).build();
+    InputStream inputStream = Objects.requireNonNull(
+        GeoLocationConfig.class.getClassLoader().getResourceAsStream("database.json"));
+
+    return new DatabaseReader.Builder(inputStream).build();
   }
 }

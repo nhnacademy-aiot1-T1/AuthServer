@@ -22,12 +22,14 @@ class AccessTokenServiceImplTest {
   private String accessToken;
   private String newAccessToken;
   private String ip;
+  private String clientId;
 
   @BeforeEach
   void setUp() {
     accessToken = "accessToken";
     newAccessToken = "newAccessToken";
     ip = "ip";
+    clientId = "clientId";
   }
 
   @Test
@@ -41,7 +43,7 @@ class AccessTokenServiceImplTest {
   @DisplayName("access token save in mysql")
   @Order(1)
   void saveAccessToken() {
-    AccessToken accessToken1 = accessTokenService.saveAccessToken(accessToken, ip);
+    AccessToken accessToken1 = accessTokenService.saveAccessToken(accessToken, ip, clientId);
     assertNotNull(accessToken1);
   }
 

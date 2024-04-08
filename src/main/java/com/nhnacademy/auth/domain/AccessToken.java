@@ -22,6 +22,9 @@ public class AccessToken {
   @Column(name = "access_token")
   private String token;
 
+  @Column(name = "user_id")
+  private String userId;
+
   @Column(name = "ip")
   private String ip;
 }
