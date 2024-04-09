@@ -3,9 +3,9 @@ package com.nhnacademy.auth.service;
 import java.time.Duration;
 
 public interface RedisService {
-    void save(String refreshToken, String userId, Duration timeDuration);
+    void save(String accessToken, String userId, Duration timeDuration);
 
-    String findUserIdByRefreshToken(String refreshToken);
+    String findUserIdByAccessTokenToken(String accessToken);
 
-    Boolean haveThisKey(String refreshToken);
+    Boolean haveThisKey(String accessToken);
 }
