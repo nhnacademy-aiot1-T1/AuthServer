@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
+import com.nhnacademy.auth.exception.ThisAccessTokenIsBlackListException;
 import com.nhnacademy.auth.exception.UserIdNotFoundException;
 import com.nhnacademy.common.dto.CommonResponse;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * <p>
  * RuntimeException으로 통일. httpStatus가 401로 동일.
  * <li> JsonProcessingException 핸들링 추가. http error status는 500
- * <li>총 6종의 예외 핸들링 중.
+ * <li> ThisAccessTokenIsBlackListException 추가. http error status는 403
+ * <li>총 7종의 예외 핸들링 중.
  * </p>
  */
 @RestControllerAdvice
@@ -36,6 +38,12 @@ public class CommonAdvice {
   @ExceptionHandler(JsonProcessingException.class)
   public ResponseEntity<CommonResponse<RuntimeException>> jsonProcessingExceptionHandler(JsonProcessingException e) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(CommonResponse.fail(e.getMessage()));
+  }
+
+  @ExceptionHandler(ThisAccessTokenIsBlackListException.class)
+  public ResponseEntity<CommonResponse<RuntimeException>> thisAccessTokenIsBlackListExceptionHandler(ThisAccessTokenIsBlackListException e) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
         .body(CommonResponse.fail(e.getMessage()));
   }
 }
