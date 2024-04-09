@@ -1,13 +1,12 @@
 package com.nhnacademy.auth.service;
 
 import com.nhnacademy.auth.domain.AccessToken;
-import com.nhnacademy.auth.dto.RegenerateAccessTokenDto;
 
 public interface AccessTokenService {
 
   boolean findAccessToken(String accessToken);
 
-  AccessToken saveAccessToken(String accessToken, String ip, String userId);
+  AccessToken saveAccessToken(String accessToken, String ip, String userId, String userAgentBrowser);
 
   boolean updateAccessToken(String legacyAccessToken, String accessToken);
 
