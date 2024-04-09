@@ -9,8 +9,10 @@ import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.service.JwtTokenService;
 import com.nhnacademy.auth.service.LoginService;
+import com.nhnacademy.auth.service.RedisService;
 import com.nhnacademy.common.dto.CommonResponse;
 import java.io.IOException;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -34,12 +36,13 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/auth/login")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class LoginController {
 
   private final LoginService loginService;
   private final JwtTokenService jwtTokenService;
+  private final RedisService redisService;
 
   private static final String CONTENT_TYPE = "Content-Type";
   private static final String APPLICATION_JSON = MediaType.APPLICATION_JSON_VALUE;
@@ -50,18 +53,19 @@ public class LoginController {
    * <li>로그인에 실패했을 경우 : exception.
    * <li> 단위 test 돌릴 때에는, 아래의 if문 주석처리 하고 돌려야 작동함.
    * <p>
+   *
    * @param info : id, password, ip
    * @return : LoginResponse
    * @Exception : PasswordNotMatchException(userId)
    */
-  @PostMapping("/pc")
+  @PostMapping("/login/pc")
   public ResponseEntity<CommonResponse<LoginResponse>> login(@RequestBody LoginInfo info) {
     if (!loginService.match(info)) {
       throw new PasswordNotMatchException(info.getId());
     }
 
     User user = loginService.getUser(info.getId());
-    String accessToken = jwtTokenService.generateAccessToken(user, info.getIp());
+    String accessToken = jwtTokenService.generateAccessToken(user, info.getIp(), info.getUserAgentBrowser());
 
     log.error("in login", accessToken);
     LoginResponse loginResponse = new LoginResponse(user.getId(), user.getRole(), accessToken);
@@ -84,7 +88,7 @@ public class LoginController {
    * @return : LoginResponse
    * @Exception : PasswordNotMatchException(userId)
    */
-  @PostMapping("/mobile")
+  @PostMapping("/login/mobile")
   public ResponseEntity<CommonResponse<LoginResponse>> loginMobile(@RequestBody LoginInfo info)
       throws IOException, GeoIp2Exception {
     if (!loginService.match(info)) {
@@ -92,7 +96,7 @@ public class LoginController {
     }
 
     User user = loginService.getUser(info.getId());
-    String accessToken = jwtTokenService.generateJwtTokenFromMobile(user, info.getIp());
+    String accessToken = jwtTokenService.generateJwtTokenFromMobile(user, info.getIp(), info.getUserAgentBrowser());
 
     LoginResponse loginResponse = new LoginResponse(user.getId(), user.getRole(), accessToken);
 
@@ -111,7 +115,7 @@ public class LoginController {
    * @return : String
    * @Exception : IpIsNotEqualsException
    */
-  @PostMapping(value = "/regenerate")
+  @PostMapping(value = "/login/regenerate")
   public ResponseEntity<CommonResponse<String>> regenerateAccessToken(@RequestBody
       RegenerateAccessTokenDto regenerateAccessTokenDto) throws JsonProcessingException {
 
@@ -122,5 +126,24 @@ public class LoginController {
     return ResponseEntity.status(HttpStatus.CREATED)
         .header(CONTENT_TYPE, APPLICATION_JSON)
         .body(CommonResponse.success(regenerateAccessToken, SUCCESS));
+  }
+
+  @PostMapping(value = "/logout")
+  public ResponseEntity<CommonResponse<String>> logout(@RequestBody String accessToken)
+      throws JsonProcessingException {
+    String userId = jwtTokenService.getUserIdFromJwtToken(accessToken);
+    String expiredTime = jwtTokenService.getExpiredTimeFromJwtToken(accessToken);
+
+    long expiredTimeLong = Long.parseLong(expiredTime);
+    long now = System.currentTimeMillis();
+    long nowSeconds = now / 1000;
+
+    long ttLime = expiredTimeLong - nowSeconds;
+
+    redisService.save(accessToken, userId, Duration.ofSeconds(ttLime));
+
+    return ResponseEntity.status(HttpStatus.OK)
+        .header(CONTENT_TYPE, APPLICATION_JSON)
+        .body(CommonResponse.success("logout success", SUCCESS));
   }
 }
