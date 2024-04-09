@@ -6,6 +6,7 @@ import com.nhnacademy.auth.domain.AccessToken;
 import com.nhnacademy.auth.service.AccessTokenService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ class AccessTokenServiceImplTest {
   private String newAccessToken;
   private String ip;
   private String clientId;
+  private String browser;
 
   @BeforeEach
   void setUp() {
@@ -30,6 +32,7 @@ class AccessTokenServiceImplTest {
     newAccessToken = "newAccessToken";
     ip = "ip";
     clientId = "clientId";
+    browser = "chrome";
   }
 
   @Test
@@ -43,7 +46,7 @@ class AccessTokenServiceImplTest {
   @DisplayName("access token save in mysql")
   @Order(1)
   void saveAccessToken() {
-    AccessToken accessToken1 = accessTokenService.saveAccessToken(accessToken, ip, clientId);
+    AccessToken accessToken1 = accessTokenService.saveAccessToken(accessToken, ip, clientId, browser);
     assertNotNull(accessToken1);
   }
 
@@ -60,6 +63,6 @@ class AccessTokenServiceImplTest {
   @Order(4)
   void deleteAccessToken() {
     accessTokenService.deleteAccessToken(newAccessToken);
-    assertNull(accessTokenService.findAccessToken(accessToken));
+    assertFalse(accessTokenService.findAccessToken(accessToken));
   }
 }
