@@ -33,8 +33,9 @@ public class AccessTokenServiceImpl implements AccessTokenService {
    * @return : AccessToken DTO
    */
   @Override
-  public AccessToken saveAccessToken(String accessToken, String ip, String userId) {
-    AccessToken newAccessToken = new AccessToken(accessToken, ip, userId);
+  public AccessToken saveAccessToken(String accessToken, String ip, String userId,
+      String userAgentBrowser) {
+    AccessToken newAccessToken = new AccessToken(accessToken, ip, userId, userAgentBrowser);
     return accessTokenRepository.save(newAccessToken);
   }
 
@@ -57,7 +58,8 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     deleteAccessToken(legacyAccessToken);
     accessTokenRepository.flush();
     accessTokenRepository.save(
-        new AccessToken(accessToken, value.get().getIp(), value.get().getUserId()));
+        new AccessToken(accessToken, value.get().getIp(), value.get().getUserId(), value.get()
+            .getBrowser()));
     return true;
   }
 
