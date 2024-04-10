@@ -19,22 +19,22 @@ public class RedisServiceImpl implements RedisService {
   /**
    * TTL 기능이 있음. timeDuration으로 설정 가능. 단위: sec
    *
-   * @param refreshToken
+   * @param accessToken
    * @param userId
    * @param timeDuration : sec
    */
   @Override
-  public void save(String refreshToken, String userId, Duration timeDuration) {
-    redisTemplate.opsForValue().set(refreshToken, userId, timeDuration);
+  public void save(String accessToken, String userId, Duration timeDuration) {
+    redisTemplate.opsForValue().set(accessToken, userId, timeDuration);
   }
 
   @Override
-  public String findUserIdByRefreshToken(String refreshToken) {
-    return redisTemplate.opsForValue().get(refreshToken);
+  public String findUserIdByAccessTokenToken(String accessToken) {
+    return redisTemplate.opsForValue().get(accessToken);
   }
 
   @Override
-  public Boolean haveThisKey(String refreshToken) {
-    return redisTemplate.hasKey(refreshToken);
+  public Boolean haveThisKey(String accessToken) {
+    return redisTemplate.hasKey(accessToken);
   }
 }

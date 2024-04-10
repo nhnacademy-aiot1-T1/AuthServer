@@ -11,6 +11,7 @@ import lombok.Getter;
 public class User {
 
   private String id;
+  private String userAgentBrowser;
   private Status status;
   private Role role;
 
@@ -19,7 +20,7 @@ public class User {
    * <li> ADMIN
    * <li> USER
    */
-  public enum Status {
+  public enum Role {
     ADMIN,
     USER
   }
@@ -29,7 +30,7 @@ public class User {
    * <li> ACTIVE
    * <li> DEACTIVATE
    */
-  public enum Role {
+  public enum Status {
     ACTIVE,
     DEACTIVATE
   }

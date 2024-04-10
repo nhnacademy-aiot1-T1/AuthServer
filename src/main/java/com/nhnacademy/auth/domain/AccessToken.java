@@ -27,4 +27,7 @@ public class AccessToken {
 
   @Column(name = "ip")
   private String ip;
+
+  @Column(name = "browser")
+  private String browser;
 }

@@ -24,7 +24,6 @@ public class IpGeolocationServiceImpl implements IpGeolationService {
   public String getContury(String ip) throws IOException, GeoIp2Exception {
     InetAddress inetAddress = InetAddress.getByName(ip);
     String conturyIp = databaseReader.country(inetAddress).getCountry().getIsoCode();
-    System.out.printf("%s{}", conturyIp);
     return conturyIp;
   }
 }

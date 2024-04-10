@@ -8,10 +8,12 @@ import com.nhnacademy.auth.dto.JwtPayloadDto;
 import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
 import com.nhnacademy.auth.exception.ExpiredJwtTokenException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
+import com.nhnacademy.auth.exception.ThisAccessTokenIsBlackListException;
 import com.nhnacademy.auth.properties.JwtProperties;
 import com.nhnacademy.auth.service.AccessTokenService;
 import com.nhnacademy.auth.service.IpGeolationService;
 import com.nhnacademy.auth.service.JwtTokenService;
+import com.nhnacademy.auth.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -40,13 +42,15 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
   private final AccessTokenService accessTokenService;
 
+  private final RedisService redisService;
+
   private static final int EXPIRED_TIME_MINUTE = 50;
 
   @Override
-  public String generateAccessToken(User user, String ip) {
+  public String generateAccessToken(User user, String ip, String browser) {
     String accessToken = createJwtToken(user.getId(), user.getRole().toString(), ip,
         EXPIRED_TIME_MINUTE);
-    accessTokenService.saveAccessToken(accessToken, ip, user.getId());
+    accessTokenService.saveAccessToken(accessToken, ip, user.getId(), browser);
     return accessToken;
   }
 
@@ -78,15 +82,19 @@ public class JwtTokenServiceImpl implements JwtTokenService {
   }
 
   @Override
-  public String generateJwtTokenFromMobile(User user, String ip)
+  public String generateJwtTokenFromMobile(User user, String ip, String browser)
       throws IOException, GeoIp2Exception {
     String mobileIpCountry = ipGeolationService.getContury(ip);
-    return generateAccessToken(user, mobileIpCountry);
+    return generateAccessToken(user, mobileIpCountry, browser);
   }
 
   @Override
   public String regenerateAccessToken(String nowIp, String legacyAccessToken)
       throws JsonProcessingException {
+
+    if (redisService.haveThisKey(legacyAccessToken)) {
+      throw new ThisAccessTokenIsBlackListException();
+    }
 
     String encodeIp = DigestUtils.sha256Hex(nowIp);
     String userId = getUserIdFromJwtToken(legacyAccessToken);
@@ -116,19 +124,19 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     return legacyIp.equals(nowIp);
   }
 
-  private String getEncodeIpFromJwtToken(String token) throws JsonProcessingException {
+  public String getEncodeIpFromJwtToken(String token) throws JsonProcessingException {
     return parsing(token).getUserIp();
   }
 
-  private String getUserIdFromJwtToken(String token) throws JsonProcessingException {
+  public String getUserIdFromJwtToken(String token) throws JsonProcessingException {
     return parsing(token).getUserId();
   }
 
-  private String getUserRoleFromJwtToken(String token) throws JsonProcessingException {
+  public String getUserRoleFromJwtToken(String token) throws JsonProcessingException {
     return parsing(token).getUserRole();
   }
 
-  private String getExpiredTimeFromJwtToken(String token) throws JsonProcessingException {
+  public String getExpiredTimeFromJwtToken(String token) throws JsonProcessingException {
     return parsing(token).getExp();
   }
 

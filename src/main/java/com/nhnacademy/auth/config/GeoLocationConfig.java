@@ -14,7 +14,7 @@ public class GeoLocationConfig {
   public DatabaseReader databaseReader() throws IOException {
 
     InputStream inputStream = Objects.requireNonNull(
-        GeoLocationConfig.class.getClassLoader().getResourceAsStream("database.json"));
+        GeoLocationConfig.class.getClassLoader().getResourceAsStream("GeoLite2-Country.mmdb"));
 
     return new DatabaseReader.Builder(inputStream).build();
   }
