@@ -9,7 +9,5 @@ public class LoginInfo {
 
   private String id;
   private String password;
-  private String ip;
-  private String userAgentBrowser;
 
 }
