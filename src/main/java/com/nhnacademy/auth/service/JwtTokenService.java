@@ -9,11 +9,11 @@ public interface JwtTokenService {
 
   String generateAccessToken(User user, String ip, String browser);
 
-  String createJwtToken(String userId, String userRole, String ip, int expiredTime);
+  String createJwtToken(String userId, int expiredTime);
 
   String generateJwtTokenFromMobile(User user, String ip, String browser) throws IOException, GeoIp2Exception;
 
-  String regenerateAccessToken(String nowIp, String legacyAccessToken)
+  String regenerateAccessToken(String nowIp, String browser,String legacyAccessToken)
       throws JsonProcessingException;
 
   String getExpiredTimeFromJwtToken(String token) throws JsonProcessingException;

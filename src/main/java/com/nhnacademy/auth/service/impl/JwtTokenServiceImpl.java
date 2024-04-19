@@ -8,12 +8,11 @@ import com.nhnacademy.auth.dto.JwtPayloadDto;
 import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
 import com.nhnacademy.auth.exception.ExpiredJwtTokenException;
 import com.nhnacademy.auth.exception.IpIsNotEqualsException;
-import com.nhnacademy.auth.exception.ThisAccessTokenIsBlackListException;
 import com.nhnacademy.auth.properties.JwtProperties;
+import com.nhnacademy.auth.repository.AccessTokenRepository.IpAndBrowser;
 import com.nhnacademy.auth.service.AccessTokenService;
 import com.nhnacademy.auth.service.IpGeolationService;
 import com.nhnacademy.auth.service.JwtTokenService;
-import com.nhnacademy.auth.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -42,14 +41,11 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
   private final AccessTokenService accessTokenService;
 
-  private final RedisService redisService;
-
   private static final int EXPIRED_TIME_MINUTE = 50;
 
   @Override
   public String generateAccessToken(User user, String ip, String browser) {
-    String accessToken = createJwtToken(user.getId(), user.getRole().toString(), ip,
-        EXPIRED_TIME_MINUTE);
+    String accessToken = createJwtToken(user.getId(), EXPIRED_TIME_MINUTE);
     accessTokenService.saveAccessToken(accessToken, ip, user.getId(), browser);
     return accessToken;
   }
@@ -62,13 +58,10 @@ public class JwtTokenServiceImpl implements JwtTokenService {
    * @return string : JwtToken
    */
   @Override
-  public String createJwtToken(String userId, String userRole, String ip, int expiredTime) {
-    String encodeIp = DigestUtils.sha256Hex(ip);
+  public String createJwtToken(String userId, int expiredTime) {
 
     Claims claims = Jwts.claims();
     claims.put("userId", userId);
-    claims.put("userRole", userRole);
-    claims.put("userIp", encodeIp);
 
     log.warn("claims", claims);
     Date now = new Date();
@@ -89,51 +82,29 @@ public class JwtTokenServiceImpl implements JwtTokenService {
   }
 
   @Override
-  public String regenerateAccessToken(String nowIp, String legacyAccessToken)
+  public String regenerateAccessToken(String nowIp, String browser, String legacyAccessToken)
       throws JsonProcessingException {
 
-    if (redisService.haveThisKey(legacyAccessToken)) {
-      throw new ThisAccessTokenIsBlackListException();
-    }
+    IpAndBrowser ipAndBrowser = accessTokenService.getIpAndBrowser(legacyAccessToken).orElse(null);
 
     String encodeIp = DigestUtils.sha256Hex(nowIp);
-    String userId = getUserIdFromJwtToken(legacyAccessToken);
-    String userRole = getUserRoleFromJwtToken(legacyAccessToken);
-    String userIp = getEncodeIpFromJwtToken(legacyAccessToken);
-    String expTime = getExpiredTimeFromJwtToken(legacyAccessToken);
-    long legacyAccessTokenExp = Long.parseLong(expTime);
-    long now = System.currentTimeMillis();
-    long nowSecodns = now / 1000;
 
-    if (!checkAccessTokenIp(userIp, encodeIp)) {
-      throw new IpIsNotEqualsException();
-    }
-    if (legacyAccessTokenExp < nowSecodns) {
-      throw new ExpiredJwtTokenException();
-    }
     if (!accessTokenService.findAccessToken(legacyAccessToken)) {
       throw new AccessTokenNotFoundException();
     }
-    String newAccessToken = createJwtToken(userId, userRole, userIp, EXPIRED_TIME_MINUTE);
+    if (!(ipAndBrowser.getIp().equals(encodeIp) && ipAndBrowser.getBrowser().equals(browser))) {
+      throw new IpIsNotEqualsException();
+    }
+
+    String userId = getUserIdFromJwtToken(legacyAccessToken);
+
+    String newAccessToken = createJwtToken(userId, EXPIRED_TIME_MINUTE);
     accessTokenService.updateAccessToken(legacyAccessToken, newAccessToken);
     return newAccessToken;
   }
 
-
-  private boolean checkAccessTokenIp(String legacyIp, String nowIp) {
-    return legacyIp.equals(nowIp);
-  }
-
-  public String getEncodeIpFromJwtToken(String token) throws JsonProcessingException {
-    return parsing(token).getUserIp();
-  }
-
   public String getUserIdFromJwtToken(String token) throws JsonProcessingException {
     return parsing(token).getUserId();
-  }
-
-  public String getUserRoleFromJwtToken(String token) throws JsonProcessingException {
-    return parsing(token).getUserRole();
   }
 
   public String getExpiredTimeFromJwtToken(String token) throws JsonProcessingException {

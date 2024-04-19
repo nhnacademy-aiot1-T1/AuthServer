@@ -1,15 +1,16 @@
 package com.nhnacademy.auth.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.LoginResponse;
 import com.nhnacademy.auth.dto.RegenerateAccessTokenDto;
 import com.nhnacademy.auth.dto.User;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
+import com.nhnacademy.auth.service.AccessTokenService;
 import com.nhnacademy.auth.service.JwtTokenService;
 import com.nhnacademy.auth.service.LoginService;
-import com.nhnacademy.auth.service.RedisService;
 import com.nhnacademy.common.dto.CommonResponse;
 import java.io.IOException;
 import java.time.Duration;
@@ -42,7 +43,7 @@ public class LoginController {
 
   private final LoginService loginService;
   private final JwtTokenService jwtTokenService;
-  private final RedisService redisService;
+  private final AccessTokenService accessTokenService;
 
   private static final String CONTENT_TYPE = "Content-Type";
   private static final String APPLICATION_JSON = MediaType.APPLICATION_JSON_VALUE;
@@ -121,6 +122,7 @@ public class LoginController {
 
     String regenerateAccessToken = jwtTokenService.regenerateAccessToken(
         regenerateAccessTokenDto.getIp(),
+        regenerateAccessTokenDto.getBrowser(),
         regenerateAccessTokenDto.getLegacyAccessToken());
 
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -129,18 +131,9 @@ public class LoginController {
   }
 
   @PostMapping(value = "/logout")
-  public ResponseEntity<CommonResponse<String>> logout(@RequestBody String accessToken)
-      throws JsonProcessingException {
-    String userId = jwtTokenService.getUserIdFromJwtToken(accessToken);
-    String expiredTime = jwtTokenService.getExpiredTimeFromJwtToken(accessToken);
+  public ResponseEntity<CommonResponse<String>> logout(@RequestBody String accessToken) {
 
-    long expiredTimeLong = Long.parseLong(expiredTime);
-    long now = System.currentTimeMillis();
-    long nowSeconds = now / 1000;
-
-    long ttLime = expiredTimeLong - nowSeconds;
-
-    redisService.save(accessToken, userId, Duration.ofSeconds(ttLime));
+    accessTokenService.deleteAccessToken(accessToken);
 
     return ResponseEntity.status(HttpStatus.OK)
         .header(CONTENT_TYPE, APPLICATION_JSON)

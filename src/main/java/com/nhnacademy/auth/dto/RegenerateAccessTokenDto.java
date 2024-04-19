@@ -8,6 +8,7 @@ import lombok.Getter;
 public class RegenerateAccessTokenDto {
   private String id;
   private String ip;
+  private String browser;
   private String legacyAccessToken;
 }
 

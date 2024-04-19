@@ -64,7 +64,7 @@ class JwtTokenServiceImplTest {
   @DisplayName("regenerate access token")
   @Order(3)
   void regenerateAccessToken() throws JsonProcessingException {
-    String regenerateAccessToken = jwtTokenService.regenerateAccessToken("112.216.11.34",
+    String regenerateAccessToken = jwtTokenService.regenerateAccessToken("112.216.11.34", browser,
         legacyAccessToken);
     log.warn(regenerateAccessToken);
     assertNotNull(regenerateAccessToken);
