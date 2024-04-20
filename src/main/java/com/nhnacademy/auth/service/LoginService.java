@@ -4,7 +4,7 @@ import com.nhnacademy.auth.dto.LoginInfo;
 import com.nhnacademy.auth.dto.User;
 
 public interface LoginService {
-    boolean match(LoginInfo loginRequest);
-
-    User getUser(String userId);
+    void match(LoginInfo loginRequest, LoginInfo userInfo);
+    LoginInfo getAccountInfo(String loginId);
+    User getUser(Long userId);
 }

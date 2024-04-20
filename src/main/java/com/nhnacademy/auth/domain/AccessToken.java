@@ -20,10 +20,10 @@ public class AccessToken {
 
   @Id
   @Column(name = "access_token")
-  private String token;
+  private String accessToken;
 
   @Column(name = "user_id")
-  private String userId;
+  private Long userId;
 
   @Column(name = "ip")
   private String ip;

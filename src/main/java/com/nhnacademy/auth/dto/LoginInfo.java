@@ -7,7 +7,8 @@ import lombok.Getter;
 @Getter
 public class LoginInfo {
 
-  private String id;
+  private Long id;
+  private String loginId;
   private String password;
 
 }

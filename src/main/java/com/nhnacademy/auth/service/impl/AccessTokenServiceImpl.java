@@ -23,9 +23,10 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
 
   @Override
-  public boolean findAccessToken(String accessToken) {
+  public boolean existsAccessToken(String accessToken) {
     return accessTokenRepository.existsById(accessToken);
   }
+
 
   /**
    * param을 받아, mysql에 key, value 값으로 저장.
@@ -34,9 +35,9 @@ public class AccessTokenServiceImpl implements AccessTokenService {
    * @return : AccessToken DTO
    */
   @Override
-  public AccessToken saveAccessToken(String accessToken, String ip, String userId,
+  public AccessToken saveAccessToken(String accessToken, String ip, Long userId,
       String userAgentBrowser) {
-    AccessToken newAccessToken = new AccessToken(accessToken, ip, userId, userAgentBrowser);
+    AccessToken newAccessToken = new AccessToken(accessToken, userId, ip, userAgentBrowser);
     return accessTokenRepository.save(newAccessToken);
   }
 
@@ -53,13 +54,13 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     if (value.isEmpty()) {
       return false;
     }
-    if (!findAccessToken(legacyAccessToken)) {
+    if (!existsAccessToken(legacyAccessToken)) {
       return false;
     }
     deleteAccessToken(legacyAccessToken);
     accessTokenRepository.flush();
     accessTokenRepository.save(
-        new AccessToken(accessToken, value.get().getIp(), value.get().getUserId(), value.get()
+        new AccessToken(accessToken, value.get().getUserId(), value.get().getIp(), value.get()
             .getBrowser()));
     return true;
   }

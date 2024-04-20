@@ -7,16 +7,16 @@ import java.io.IOException;
 
 public interface JwtTokenService {
 
-  String generateAccessToken(User user, String ip, String browser);
+  String issueAndSaveAccessToken(User user);
 
-  String createJwtToken(String userId, int expiredTime);
+  String createJwt(Long userId, int expiredTime);
 
-  String generateJwtTokenFromMobile(User user, String ip, String browser) throws IOException, GeoIp2Exception;
+  String generateJwtFromMobile(User user) throws IOException, GeoIp2Exception;
 
   String regenerateAccessToken(String nowIp, String browser,String legacyAccessToken)
       throws JsonProcessingException;
 
-  String getExpiredTimeFromJwtToken(String token) throws JsonProcessingException;
+  String getExpiredTimeFromJwt(String token) throws JsonProcessingException;
 
-  String getUserIdFromJwtToken(String token) throws JsonProcessingException;
+  String getUserIdFromJwt(String token) throws JsonProcessingException;
 }

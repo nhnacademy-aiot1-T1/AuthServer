@@ -2,16 +2,20 @@ package com.nhnacademy.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Account api에서 받을 user 정보
  */
 @Getter
+@ToString
 @AllArgsConstructor
 public class User {
 
-  private String id;
-  private String userAgentBrowser;
+  private Long id;
+  private String name;
+  private String email;
+  private String authType;
   private Status status;
   private Role role;
 

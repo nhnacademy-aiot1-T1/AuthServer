@@ -4,9 +4,11 @@ import com.nhnacademy.auth.exception.BadRequestException;
 import com.nhnacademy.auth.thread.UserAgentStore;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+@Slf4j
 public class UserAgentInterceptor implements HandlerInterceptor {
 
   private static final String USER_BROWSER_HEADER = "X-USER-BROWSER";

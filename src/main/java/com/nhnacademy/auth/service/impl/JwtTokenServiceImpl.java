@@ -13,9 +13,11 @@ import com.nhnacademy.auth.repository.AccessTokenRepository.IpAndBrowser;
 import com.nhnacademy.auth.service.AccessTokenService;
 import com.nhnacademy.auth.service.IpGeolationService;
 import com.nhnacademy.auth.service.JwtTokenService;
+import com.nhnacademy.auth.thread.UserAgentStore;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import java.io.IOException;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
@@ -40,13 +42,23 @@ public class JwtTokenServiceImpl implements JwtTokenService {
   private final IpGeolationService ipGeolationService;
 
   private final AccessTokenService accessTokenService;
-
   private static final int EXPIRED_TIME_MINUTE = 50;
 
+  /**
+   * Jwt 을 발급하고, 발급된 토큰을 저장하는 메서드.
+   * @param user : userId, userRole, userStatus
+   * @return : accessToken
+   */
   @Override
-  public String generateAccessToken(User user, String ip, String browser) {
-    String accessToken = createJwtToken(user.getId(), EXPIRED_TIME_MINUTE);
-    accessTokenService.saveAccessToken(accessToken, ip, user.getId(), browser);
+  public String issueAndSaveAccessToken(User user) {
+
+    Long userId = user.getId();
+    String ip = UserAgentStore.getUserIp();
+    String browser = UserAgentStore.getUserBrowser();
+    log.info("ip : {}, browser : {}", ip, browser);
+    String accessToken = createJwt(userId, EXPIRED_TIME_MINUTE);
+    accessTokenService.saveAccessToken(accessToken, ip, userId, browser);
+
     return accessToken;
   }
 
@@ -58,27 +70,30 @@ public class JwtTokenServiceImpl implements JwtTokenService {
    * @return string : JwtToken
    */
   @Override
-  public String createJwtToken(String userId, int expiredTime) {
-
+  public String createJwt(Long userId, int expiredTime) {
     Claims claims = Jwts.claims();
-    claims.put("userId", userId);
-
-    log.warn("claims", claims);
     Date now = new Date();
+
+    byte[] jwtSecret = jwtProperties.getSecret().getBytes();
+
+    claims.put("userId", userId);
+    log.debug("claims {} ", claims);
 
     return Jwts.builder()
         .setClaims(claims)
         .setIssuedAt(now)
         .setExpiration(DateUtils.addMinutes(now, expiredTime))
-        .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret())
+        .signWith(Keys.hmacShaKeyFor(jwtSecret))
         .compact();
   }
 
   @Override
-  public String generateJwtTokenFromMobile(User user, String ip, String browser)
+  public String generateJwtFromMobile(User user)
       throws IOException, GeoIp2Exception {
+    String ip = UserAgentStore.getUserIp();
     String mobileIpCountry = ipGeolationService.getContury(ip);
-    return generateAccessToken(user, mobileIpCountry, browser);
+    UserAgentStore.setUserIp(mobileIpCountry);
+    return issueAndSaveAccessToken(user);
   }
 
   @Override
@@ -89,25 +104,26 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
     String encodeIp = DigestUtils.sha256Hex(nowIp);
 
-    if (!accessTokenService.findAccessToken(legacyAccessToken)) {
+    if (!accessTokenService.existsAccessToken(legacyAccessToken)) {
       throw new AccessTokenNotFoundException();
     }
     if (!(ipAndBrowser.getIp().equals(encodeIp) && ipAndBrowser.getBrowser().equals(browser))) {
       throw new IpIsNotEqualsException();
     }
 
-    String userId = getUserIdFromJwtToken(legacyAccessToken);
+    Long userId = Long.valueOf(getUserIdFromJwt(legacyAccessToken));
 
-    String newAccessToken = createJwtToken(userId, EXPIRED_TIME_MINUTE);
+    String newAccessToken = createJwt(userId, EXPIRED_TIME_MINUTE);
     accessTokenService.updateAccessToken(legacyAccessToken, newAccessToken);
     return newAccessToken;
   }
 
-  public String getUserIdFromJwtToken(String token) throws JsonProcessingException {
+  @Override
+  public String getUserIdFromJwt(String token) throws JsonProcessingException {
     return parsing(token).getUserId();
   }
 
-  public String getExpiredTimeFromJwtToken(String token) throws JsonProcessingException {
+  public String getExpiredTimeFromJwt(String token) throws JsonProcessingException {
     return parsing(token).getExp();
   }
 

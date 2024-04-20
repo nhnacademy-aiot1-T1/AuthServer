@@ -23,7 +23,7 @@ class AccessTokenServiceImplTest {
   private String accessToken;
   private String newAccessToken;
   private String ip;
-  private String clientId;
+  private Long clientId;
   private String browser;
 
   @BeforeEach
@@ -31,7 +31,7 @@ class AccessTokenServiceImplTest {
     accessToken = "accessToken";
     newAccessToken = "newAccessToken";
     ip = "ip";
-    clientId = "clientId";
+    clientId = 2L;
     browser = "chrome";
   }
 
@@ -39,7 +39,7 @@ class AccessTokenServiceImplTest {
   @Order(2)
   @DisplayName("access token find in mysql")
   void findAccessToken() {
-    assertNotNull(accessTokenService.findAccessToken(accessToken));
+    assertNotNull(accessTokenService.existsAccessToken(accessToken));
   }
 
   @Test
@@ -55,7 +55,7 @@ class AccessTokenServiceImplTest {
   @Order(3)
   void updateAccessToken() {
     accessTokenService.updateAccessToken(accessToken, newAccessToken);
-    assertNotNull(accessTokenService.findAccessToken(accessToken));
+    assertNotNull(accessTokenService.existsAccessToken(accessToken));
   }
 
   @Test
@@ -63,6 +63,6 @@ class AccessTokenServiceImplTest {
   @Order(4)
   void deleteAccessToken() {
     accessTokenService.deleteAccessToken(newAccessToken);
-    assertFalse(accessTokenService.findAccessToken(accessToken));
+    assertFalse(accessTokenService.existsAccessToken(accessToken));
   }
 }

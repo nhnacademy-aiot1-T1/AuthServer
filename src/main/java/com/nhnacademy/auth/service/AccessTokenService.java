@@ -6,9 +6,9 @@ import java.util.Optional;
 
 public interface AccessTokenService {
 
-  boolean findAccessToken(String accessToken);
+  boolean existsAccessToken(String accessToken);
 
-  AccessToken saveAccessToken(String accessToken, String ip, String userId, String userAgentBrowser);
+  AccessToken saveAccessToken(String accessToken, String ip, Long userId, String userAgentBrowser);
 
   boolean updateAccessToken(String legacyAccessToken, String accessToken);
 
