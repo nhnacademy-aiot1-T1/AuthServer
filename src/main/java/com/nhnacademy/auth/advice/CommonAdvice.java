@@ -1,49 +1,47 @@
 package com.nhnacademy.auth.advice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.nhnacademy.auth.exception.AccessTokenNotFoundException;
-import com.nhnacademy.auth.exception.IpIsNotEqualsException;
-import com.nhnacademy.auth.exception.PasswordNotMatchException;
-import com.nhnacademy.auth.exception.ThisAccessTokenIsBlackListException;
-import com.nhnacademy.auth.exception.UserIdNotFoundException;
+import com.nhnacademy.auth.exception.base.AbstractApiException;
 import com.nhnacademy.common.dto.CommonResponse;
-import io.jsonwebtoken.ExpiredJwtException;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
 /**
- * 현재 exception handler만 하는 RestControllerAdvice.
- * <p>
- * RuntimeException으로 통일. httpStatus가 401로 동일.
- * <li> JsonProcessingException 핸들링 추가. http error status는 500
- * <li> ThisAccessTokenIsBlackListException 추가. http error status는 403
- * <li>총 7종의 예외 핸들링 중.
- * </p>
+ * 공통 예외 처리 클래스.
  */
 @RestControllerAdvice
 public class CommonAdvice {
 
-  @ExceptionHandler(value = {PasswordNotMatchException.class,
-      UserIdNotFoundException.class,
-      IpIsNotEqualsException.class,
-      AccessTokenNotFoundException.class,
-      ExpiredJwtException.class})
-  public ResponseEntity<CommonResponse<RuntimeException>> authorizationFailureHandler(RuntimeException e) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(CommonResponse.fail(e.getMessage()));
+  /**
+   * 추상 클래스인 AbstractApiException 을 상속 받은 예외 처리.
+   *
+   * @param exception 예외
+   * @param response  응답
+   * @return CommonResponse
+   */
+  @ExceptionHandler(AbstractApiException.class)
+  public CommonResponse<String> apiExceptionHandler(
+      final AbstractApiException exception, HttpServletResponse response) {
+    int httpStatus = exception.getHttpStatus().value();
+    response.setStatus(httpStatus);
+    return CommonResponse.fail(exception.getMessage());
   }
 
-  @ExceptionHandler(JsonProcessingException.class)
-  public ResponseEntity<CommonResponse<RuntimeException>> jsonProcessingExceptionHandler(JsonProcessingException e) {
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(CommonResponse.fail(e.getMessage()));
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public CommonResponse<String> methodArgumentNotValidExceptionHandler(
+      final MethodArgumentNotValidException e) {
+    return CommonResponse.fail(e.getMessage());
   }
 
-  @ExceptionHandler(ThisAccessTokenIsBlackListException.class)
-  public ResponseEntity<CommonResponse<RuntimeException>> thisAccessTokenIsBlackListExceptionHandler(ThisAccessTokenIsBlackListException e) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .body(CommonResponse.fail(e.getMessage()));
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public CommonResponse<String> unknownExceptionHandler(
+      final Exception e) {
+    return CommonResponse.fail(e.getMessage());
   }
 }

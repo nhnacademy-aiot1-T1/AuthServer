@@ -1,16 +1,13 @@
 package com.nhnacademy.auth.repository;
 
-import com.nhnacademy.auth.domain.AccessToken;
-import java.util.Optional;
+import com.nhnacademy.auth.entity.TokenIssuanceInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AccessTokenRepository extends JpaRepository<AccessToken, String> {
+/**
+ * TokenIssuanceInfo 엔티티의 JPA Repository.
+ */
+public interface AccessTokenRepository extends JpaRepository<TokenIssuanceInfo, String> {
 
-  interface IpAndBrowser{
-    String getIp();
-    String getBrowser();
-  }
-
-  Optional<IpAndBrowser> findByAccessToken(String accessToken);
+  
 
 }

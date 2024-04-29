@@ -28,8 +28,8 @@ class IpGeolocationServiceImplTest {
   @Test
   @DisplayName("get contury in mobile ip")
   void getContury() throws IOException, GeoIp2Exception {
-    String i1p = ipGeolocationService.getContury(ip);
+    String i1p = ipGeolocationService.getCountry(ip);
     log.info(":{}", i1p);
-    assertNotNull(ipGeolocationService.getContury(ip));
+    assertNotNull(ipGeolocationService.getCountry(ip));
   }
 }
