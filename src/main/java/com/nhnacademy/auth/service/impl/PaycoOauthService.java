@@ -8,7 +8,7 @@ import com.nhnacademy.auth.service.OauthService;
 import com.nhnacademy.auth.service.dto.PaycoAccessTokenResponse;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Payco Oauth 서비스.
  */
 @RequiredArgsConstructor
-@Component
+@Service
 public class PaycoOauthService implements OauthService {
 
   public static final String PARAM_GRANT_TYPE = "grant_type";
