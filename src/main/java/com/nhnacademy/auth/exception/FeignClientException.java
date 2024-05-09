@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
  */
 public class FeignClientException extends AbstractApiException {
 
-  public FeignClientException(String url) {
-    super("FeignClient 호출 중 오류가 발생했습니다. : " + url);
+  public FeignClientException(String url, int status, String message) {
+    super("FeignClient 호출 중 오류가 발생했습니다 : " + url + " [" + status + "] -" + message);
   }
 
   public HttpStatus getHttpStatus() {
