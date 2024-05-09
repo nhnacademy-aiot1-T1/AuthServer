@@ -1,6 +1,6 @@
 package com.nhnacademy.auth.service;
 
-import com.nhnacademy.auth.dto.domain.UserDto;
+import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.entity.TokenIssuanceInfo;
 
 /**
@@ -8,7 +8,7 @@ import com.nhnacademy.auth.entity.TokenIssuanceInfo;
  */
 public interface JwtService {
 
-  String issueJwt(UserDto user);
+  String issueJwt(UserInfo user);
 
   void expireToken(String accessToken);
 
