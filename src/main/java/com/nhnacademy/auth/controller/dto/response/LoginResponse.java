@@ -1,4 +1,4 @@
-package com.nhnacademy.auth.dto.response;
+package com.nhnacademy.auth.controller.dto.response;
 
 import lombok.Getter;
 

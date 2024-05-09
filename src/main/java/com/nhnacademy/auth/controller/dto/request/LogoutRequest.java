@@ -1,4 +1,4 @@
-package com.nhnacademy.auth.dto.request;
+package com.nhnacademy.auth.controller.dto.request;
 
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
