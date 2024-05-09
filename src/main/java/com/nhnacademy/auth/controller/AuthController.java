@@ -1,10 +1,11 @@
 package com.nhnacademy.auth.controller;
 
-import com.nhnacademy.auth.dto.request.LoginRequest;
-import com.nhnacademy.auth.dto.request.LogoutRequest;
-import com.nhnacademy.auth.dto.request.ReissueRequest;
-import com.nhnacademy.auth.dto.response.LoginResponse;
-import com.nhnacademy.auth.service.impl.AuthServiceImpl;
+import com.nhnacademy.auth.controller.dto.request.LoginRequest;
+import com.nhnacademy.auth.controller.dto.request.LogoutRequest;
+import com.nhnacademy.auth.controller.dto.request.OauthLoginRequest;
+import com.nhnacademy.auth.controller.dto.request.ReissueRequest;
+import com.nhnacademy.auth.controller.dto.response.LoginResponse;
+import com.nhnacademy.auth.service.AuthService;
 import com.nhnacademy.common.dto.CommonResponse;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-  private final AuthServiceImpl authService;
+  private final AuthService authService;
   private static final String LOGIN_SUCCESS_MESSAGE = "login success";
   private static final String LOGOUT_SUCCESS_MESSAGE = "logout success";
   private static final String REISSUE_SUCCESS_MESSAGE = "reissue success";
@@ -53,6 +54,23 @@ public class AuthController {
     String loginId = loginRequest.getLoginId();
     String password = loginRequest.getPassword();
     String accessToken = authService.login(loginId, password);
+    LoginResponse loginResponse = new LoginResponse(accessToken);
+    return CommonResponse.success(loginResponse, LOGIN_SUCCESS_MESSAGE);
+  }
+
+  /**
+   * OAuth 로그인 요청을 받아서 액세스 토큰을 반환.
+   *
+   * @param loginRequest :OAuth 로그인 객체
+   * @return  : LoginResponse:
+   */
+  @PostMapping("/oauth-login")
+  @ResponseStatus(HttpStatus.OK)
+  public CommonResponse<LoginResponse> oauthLogin(
+      @RequestBody @Valid OauthLoginRequest loginRequest) {
+    String type = loginRequest.getType();
+    String authCode = loginRequest.getAuthCode();
+    String accessToken = authService.oauthLogin(type, authCode);
     LoginResponse loginResponse = new LoginResponse(accessToken);
     return CommonResponse.success(loginResponse, LOGIN_SUCCESS_MESSAGE);
   }
