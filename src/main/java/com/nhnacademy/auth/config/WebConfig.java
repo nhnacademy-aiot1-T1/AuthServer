@@ -20,7 +20,6 @@ public class WebConfig implements WebMvcConfigurer {
 
   private final UserAgentStore userAgentStore;
 
-
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(userAgentInterceptor())
