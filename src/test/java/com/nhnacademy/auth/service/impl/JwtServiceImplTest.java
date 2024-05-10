@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.auth.dto.domain.UserDto;
+import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.entity.TokenIssuanceInfo;
 import com.nhnacademy.auth.exception.ParseException;
 import com.nhnacademy.auth.exception.TokenNotReissuableException;
@@ -210,19 +210,14 @@ class JwtServiceImplTest {
   @Nested
   class 토큰_발급 {
 
-    UserDto user;
+    UserInfo user;
     @BeforeEach
     void setUp() {
-      user = UserDto.builder()
+      user = UserInfo.builder()
           .id(1L)
-          .loginId("user")
-          .password("1234")
           .name("홍길동")
-          .email("test@naver.com")
-          .authType("DIRECT")
-          .role(UserDto.Role.USER)
+          .role(UserInfo.Role.USER)
           .build();
-
 
       Date fixedDate = Date.from(Instant.parse("2000-01-01T00:00:00Z"));
       when(dateHolder.now()).thenReturn(fixedDate);
@@ -231,7 +226,7 @@ class JwtServiceImplTest {
     @Test
     void 토큰_발급_성공() {
       //given
-      String exceptedToken = "eyJhbGciOiJIUzM4NCJ9.eyJ1c2VySWQiOjEsIm5hbWUiOiLtmY3quLjrj5kiLCJlbWFpbCI6InRlc3RAbmF2ZXIuY29tIiwiYXV0aFR5cGUiOiJESVJFQ1QiLCJyb2xlIjoiVVNFUiIsImlhdCI6OTQ2Njg0ODAwLCJleHAiOjk0NjY4NTEwMH0.5L7BcysiB-a-ACAVT8AKD9wjzFqvZJFUSdFQbuOJkHy67Pqk4EtigYFRiYhsPjpU";
+      String exceptedToken = "eyJhbGciOiJIUzM4NCJ9.eyJ1c2VySWQiOjEsIm5hbWUiOiLtmY3quLjrj5kiLCJyb2xlIjoiVVNFUiIsImlhdCI6OTQ2Njg0ODAwLCJleHAiOjk0NjY4NTEwMH0.FyiB09xw-DBY9Hf6Vlg4OJLpynpMyY29Int19w1KKxC6podqqgPaInC3V4EFCo6w";
       when(userAgentStore.getUserIp()).thenReturn("");
       when(userAgentStore.getUserBrowser()).thenReturn("");
       when(jwtProperties.getSecret()).thenReturn("dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdHRlc3Q=");
@@ -240,14 +235,5 @@ class JwtServiceImplTest {
       //then
       assertThat(token).isEqualTo(exceptedToken);
     }
-//
-//  @Test
-//  @DisplayName("Should throw exception when token parsing fails")
-//  void shouldThrowExceptionWhenTokenParsingFails() throws JsonProcessingException {
-//    String token = "invalidToken";
-//    when(objectMapper.readValue(anyString(), any())).thenThrow(JsonProcessingException.class);
-//
-//    assertThrows(ParseException.class, () -> jwtService.extractUserId(token));
-//  }
   }
 }
