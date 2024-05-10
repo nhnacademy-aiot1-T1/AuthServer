@@ -95,6 +95,4 @@ public class AuthServiceImpl implements AuthService {
     jwtServiceImpl.expireToken(expiredToken);
     return reissueToken;
   }
-
-
 }
