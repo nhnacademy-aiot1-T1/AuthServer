@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.auth.common.DateHolder;
 import com.nhnacademy.auth.common.UserAgentStore;
-import com.nhnacademy.auth.dto.domain.UserDto;
+import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.entity.TokenIssuanceInfo;
 import com.nhnacademy.auth.exception.ParseException;
 import com.nhnacademy.auth.exception.TokenNotReissuableException;
@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 
 /**
@@ -30,24 +30,31 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @RequiredArgsConstructor
-@Component
+@Service
 public class JwtServiceImpl implements JwtService {
+
+  private static final String KEY_USER_ID = "userId";
+  private static final String KEY_NAME = "name";
+  private static final String KEY_ROLE = "role";
+  private static final String JWT_PAYLOAD_DELIMITER = "\\.";
+  private static final int JWT_PAYLOAD_INDEX = 1;
+  private static final int EXPIRED_TIME_MINUTE = 5;
 
   private final UserAgentStore userAgentStore;
   private final JwtProperties jwtProperties;
   private final AccessTokenRepository accessTokenRepository;
   private final DateHolder dateHolder;
   private final ObjectMapper objectMapper;
-  private static final int EXPIRED_TIME_MINUTE = 5;
+
 
   /**
    * jwt 토큰 발급.
    *
-   * @param user : UserDto 객체
+   * @param user : UserInfo 객체
    * @return : jwt
    */
   @Override
-  public String issueJwt(UserDto user) {
+  public String issueJwt(UserInfo user) {
     Long userId = user.getId();
     String ip = userAgentStore.getUserIp();
     String browser = userAgentStore.getUserBrowser();
@@ -107,24 +114,24 @@ public class JwtServiceImpl implements JwtService {
   public Long extractUserId(String token) {
     Base64.Decoder decoder = Base64.getDecoder();
     try {
-      String payload = new String(decoder.decode(token.split("\\.")[1]));
+      String payload = new String(
+          decoder.decode(token.split(JWT_PAYLOAD_DELIMITER)[JWT_PAYLOAD_INDEX]));
       Map<String, String> returnMap = objectMapper.readValue(payload, new TypeReference<>() {
       });
-      return Long.parseLong(returnMap.get("userId"));
+      String stringUserId = returnMap.get(KEY_USER_ID);
+      return Long.parseLong(stringUserId);
     } catch (JsonProcessingException | ArrayIndexOutOfBoundsException e) {
       throw new ParseException();
     }
   }
 
 
-  private String generateJwt(UserDto user) {
+  private String generateJwt(UserInfo user) {
     Claims claims = Jwts.claims();
 
-    claims.put("userId", user.getId());
-    claims.put("name", user.getName());
-    claims.put("email", user.getEmail());
-    claims.put("authType", user.getAuthType());
-    claims.put("role", user.getRole());
+    claims.put(KEY_USER_ID, user.getId());
+    claims.put(KEY_NAME, user.getName());
+    claims.put(KEY_ROLE, user.getRole());
     log.debug("claims {} ", claims);
 
     byte[] secret = jwtProperties.getSecret().getBytes();
