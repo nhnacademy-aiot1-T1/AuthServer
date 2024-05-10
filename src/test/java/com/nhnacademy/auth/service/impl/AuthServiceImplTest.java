@@ -11,13 +11,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.nhnacademy.auth.adaptor.AccountAdapter;
-import com.nhnacademy.auth.dto.domain.UserDto;
+import com.nhnacademy.auth.dto.domain.UserCredentials;
+import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.entity.TokenIssuanceInfo;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.exception.TokenNotReissuableException;
-import com.nhnacademy.auth.exception.UserNotFoundException;
-import com.nhnacademy.common.dto.CommonResponse;
+import com.nhnacademy.auth.service.AccountService;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
@@ -36,7 +35,7 @@ class AuthServiceImplTest {
   private PasswordEncoder passwordEncoder;
 
   @Mock
-  private AccountAdapter accountAdapter;
+  private AccountService accountService;
 
   @Mock
   private JwtServiceImpl jwtServiceImpl;
@@ -52,16 +51,14 @@ class AuthServiceImplTest {
       String loginId = "testUser";
       String password = "testPassword";
       String expectedToken = "expectedToken";
-      UserDto user = UserDto.builder()
+      UserCredentials userCredentials = UserCredentials.builder()
           .id(1L)
           .loginId("testUser")
           .password("testPassword")
-          .name("홍길동")
-          .email("")
           .build();
-      when(accountAdapter.getAccountInfo(anyString())).thenReturn(CommonResponse.success(user));
+      when(accountService.getUserCredentialsByLoginId(anyString())).thenReturn(userCredentials);
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-      when(jwtServiceImpl.issueJwt(any(UserDto.class))).thenReturn(expectedToken);
+      when(jwtServiceImpl.issueJwt(any())).thenReturn(expectedToken);
 
       String accessToken = authService.login(loginId, password);
 
@@ -71,30 +68,17 @@ class AuthServiceImplTest {
     @Test
     void 비밀번호가_일치하지_않을_때_예외를_발생시킨다() {
       String loginId = "testUser";
-      String password = "testPassword";
-      UserDto user = UserDto.builder()
+      String password = "testPassword2";
+      UserCredentials userCredentials = UserCredentials.builder()
           .id(1L)
           .loginId("testUser")
           .password("testPassword")
-          .name("홍길동")
-          .email("")
           .build();
-      when(accountAdapter.getAccountInfo(anyString())).thenReturn(CommonResponse.success(user));
+      when(accountService.getUserCredentialsByLoginId(anyString())).thenReturn(userCredentials);
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
       assertThrows(PasswordNotMatchException.class, () -> authService.login(loginId, password));
     }
-
-    @Test
-    void 아이디에_해당하는_유저가_존재하지_않을_때_예외를_발생시킨다() {
-      String loginId = "testUser";
-      String password = "testPassword";
-      when(accountAdapter.getAccountInfo(anyString())).thenReturn(
-          CommonResponse.fail("해당하는 유저가 존재하지 않습니다."));
-
-      assertThrows(UserNotFoundException.class, () -> authService.login(loginId, password));
-    }
-
   }
 
   @Nested
@@ -112,12 +96,12 @@ class AuthServiceImplTest {
 
       @Test
       void 만료된_토큰을_받아_토큰을_발급받은_IP와_브라우저를_비교해_같은_곳에서_재발급_요청이_오면_새로운_토큰을_발급한다() {
-        CommonResponse<UserDto> userResponse = CommonResponse.success(UserDto.builder().build());
+        UserInfo userInfo = UserInfo.builder().build();
         when(jwtServiceImpl.canReissue(anyString())).thenReturn(true);
         when(jwtServiceImpl.getTokenIssuanceInfo(anyString())).thenReturn(new TokenIssuanceInfo());
         when(jwtServiceImpl.extractUserId(anyString())).thenReturn(1L);
-        when(accountAdapter.getUserInfo(anyLong())).thenReturn(userResponse);
-        when(jwtServiceImpl.issueJwt(any(UserDto.class))).thenReturn("reissuedToken");
+        when(accountService.getUserInfoById(anyLong())).thenReturn(userInfo);
+        when(jwtServiceImpl.issueJwt(any(UserInfo.class))).thenReturn("reissuedToken");
 
         String newToken = authService.reissueToken("expiredToken");
 
@@ -130,8 +114,6 @@ class AuthServiceImplTest {
         assertThrows(TokenNotReissuableException.class,
             () -> authService.reissueToken("invalidToken"));
       }
-
     }
-
   }
 }
