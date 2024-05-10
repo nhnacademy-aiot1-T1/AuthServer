@@ -1,12 +1,16 @@
 package com.nhnacademy.auth.service.impl;
 
-import com.nhnacademy.auth.adaptor.AccountAdapter;
-import com.nhnacademy.auth.dto.domain.UserDto;
+import com.nhnacademy.auth.dto.domain.OauthUserInfo;
+import com.nhnacademy.auth.dto.domain.UserCredentials;
+import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.entity.TokenIssuanceInfo;
+import com.nhnacademy.auth.enums.OauthType;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.exception.TokenNotReissuableException;
-import com.nhnacademy.auth.exception.UserNotFoundException;
+import com.nhnacademy.auth.service.AccountService;
 import com.nhnacademy.auth.service.AuthService;
+import com.nhnacademy.auth.service.OauthService;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
   private final PasswordEncoder passwordEncoder;
-  private final AccountAdapter accountAdapter;
+  private final AccountService accountService;
   private final JwtServiceImpl jwtServiceImpl;
+  private final Map<String, OauthService> oauthServiceMap;
 
   /**
    * 로그인에 성공했을 경우 : accessToken 발급.
@@ -35,19 +40,35 @@ public class AuthServiceImpl implements AuthService {
    */
   @Override
   public String login(final String loginId, final String password) {
-    UserDto user = accountAdapter.getAccountInfo(loginId)
-        .dataOrElseThrow(UserNotFoundException::new);
+    UserCredentials user = accountService.getUserCredentialsByLoginId(loginId);
     if (!passwordEncoder.matches(password, user.getPassword())) {
       throw new PasswordNotMatchException(loginId);
     }
-    return jwtServiceImpl.issueJwt(user);
+    UserInfo userInfo = accountService.getUserInfoById(user.getId());
+    return jwtServiceImpl.issueJwt(userInfo);
   }
 
+  /**
+   * oauth 로그인 성공 후 받은 authCode를 받아 accessToken 발급.
+   *
+   * @param oauthType : oauthType
+   * @param authCode  : authCode
+   * @return : accessToken
+   */
   @Override
-  public String oauthLogin(final String loginId) {
-    UserDto user = accountAdapter.getAccountInfo(loginId)
-        .dataOrElseThrow(UserNotFoundException::new);
-    return jwtServiceImpl.issueJwt(user);
+  public String oauthLogin(final String oauthType, final String authCode) {
+    String oauthServiceName = OauthType.valueOf(oauthType).getBeanName();
+    OauthService oauthService = oauthServiceMap.get(oauthServiceName);
+    String accessToken = oauthService.requestAccessToken(authCode);
+    OauthUserInfo oauthUserInfo = oauthService.requestOauthUserInfo(accessToken);
+    UserInfo userInfo = accountService.getUserInfoByOauthId(oauthUserInfo.getOauthId());
+    if (userInfo == null) {
+      String oauthId = oauthUserInfo.getOauthId();
+      String email = oauthUserInfo.getEmail();
+      String name = oauthUserInfo.getName();
+      userInfo = accountService.registerOauthUser(oauthType, oauthId, name, email);
+    }
+    return jwtServiceImpl.issueJwt(userInfo);
   }
 
   @Override
@@ -63,21 +84,14 @@ public class AuthServiceImpl implements AuthService {
    */
   @Override
   public String reissueToken(String expiredToken) {
-    // 재발급 가능한 토큰인지 확인
     if (!jwtServiceImpl.canReissue(expiredToken)) {
       throw new TokenNotReissuableException();
     }
     TokenIssuanceInfo tokenIssueInfo = jwtServiceImpl.getTokenIssuanceInfo(expiredToken);
-    // 토큰 발급 시의 IP, 브라우저 정보와 요청한 정보가 같은지 확인
     jwtServiceImpl.validateLocationChanged(tokenIssueInfo);
-    // 토큰에서 userId 추출
     Long userId = jwtServiceImpl.extractUserId(expiredToken);
-    // userId로 사용자 정보 조회
-    UserDto user = accountAdapter.getUserInfo(userId)
-        .dataOrElseThrow(UserNotFoundException::new);
-    // 사용자 정보로 토큰 재발급
+    UserInfo user = accountService.getUserInfoById(userId);
     String reissueToken = jwtServiceImpl.issueJwt(user);
-    // 만료된 토큰 삭제
     jwtServiceImpl.expireToken(expiredToken);
     return reissueToken;
   }

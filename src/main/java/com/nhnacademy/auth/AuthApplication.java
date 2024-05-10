@@ -9,7 +9,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @ConfigurationPropertiesScan(basePackageClasses = PropertiesMaker.class)
 @EnableEurekaClient
-
 @EnableFeignClients
 @SpringBootApplication
 public class AuthApplication {
