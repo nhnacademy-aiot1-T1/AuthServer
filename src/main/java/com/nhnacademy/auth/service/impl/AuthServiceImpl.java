@@ -9,6 +9,7 @@ import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.exception.TokenNotReissuableException;
 import com.nhnacademy.auth.service.AccountService;
 import com.nhnacademy.auth.service.AuthService;
+import com.nhnacademy.auth.service.JwtService;
 import com.nhnacademy.auth.service.OauthService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
 
   private final PasswordEncoder passwordEncoder;
   private final AccountService accountService;
-  private final JwtServiceImpl jwtServiceImpl;
+  private final JwtService jwtService;
   private final Map<String, OauthService> oauthServiceMap;
 
   /**
@@ -45,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
       throw new PasswordNotMatchException(loginId);
     }
     UserInfo userInfo = accountService.getUserInfoById(user.getId());
-    return jwtServiceImpl.issueJwt(userInfo);
+    return jwtService.issueJwt(userInfo);
   }
 
   /**
@@ -68,12 +69,12 @@ public class AuthServiceImpl implements AuthService {
       String name = oauthUserInfo.getName();
       userInfo = accountService.registerOauthUser(oauthType, oauthId, name, email);
     }
-    return jwtServiceImpl.issueJwt(userInfo);
+    return jwtService.issueJwt(userInfo);
   }
 
   @Override
   public void logout(String accessToken) {
-    jwtServiceImpl.expireToken(accessToken);
+    jwtService.expireToken(accessToken);
   }
 
   /**
@@ -84,15 +85,15 @@ public class AuthServiceImpl implements AuthService {
    */
   @Override
   public String reissueToken(String expiredToken) {
-    if (!jwtServiceImpl.canReissue(expiredToken)) {
+    if (!jwtService.canReissue(expiredToken)) {
       throw new TokenNotReissuableException();
     }
-    TokenIssuanceInfo tokenIssueInfo = jwtServiceImpl.getTokenIssuanceInfo(expiredToken);
-    jwtServiceImpl.validateLocationChanged(tokenIssueInfo);
-    Long userId = jwtServiceImpl.extractUserId(expiredToken);
+    TokenIssuanceInfo tokenIssueInfo = jwtService.getTokenIssuanceInfo(expiredToken);
+    jwtService.validateLocationChanged(tokenIssueInfo);
+    Long userId = jwtService.extractUserId(expiredToken);
     UserInfo user = accountService.getUserInfoById(userId);
-    String reissueToken = jwtServiceImpl.issueJwt(user);
-    jwtServiceImpl.expireToken(expiredToken);
+    String reissueToken = jwtService.issueJwt(user);
+    jwtService.expireToken(expiredToken);
     return reissueToken;
   }
 }
