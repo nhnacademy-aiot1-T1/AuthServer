@@ -9,24 +9,19 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
 import com.nhnacademy.auth.adaptor.AccountAdapter;
+import com.nhnacademy.auth.base.ServiceTest;
 import com.nhnacademy.auth.dto.domain.UserCredentials;
 import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.exception.UserNotFoundException;
 import com.nhnacademy.auth.service.dto.request.OauthUserRegisterRequest;
 import com.nhnacademy.common.dto.CommonResponse;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class AccountServiceImplTest {
+class AccountServiceImplTest extends ServiceTest {
 
   @Mock
   private AccountAdapter accountAdapter;

@@ -11,25 +11,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.nhnacademy.auth.base.ServiceTest;
 import com.nhnacademy.auth.dto.domain.UserCredentials;
 import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.entity.TokenIssuanceInfo;
 import com.nhnacademy.auth.exception.PasswordNotMatchException;
 import com.nhnacademy.auth.exception.TokenNotReissuableException;
 import com.nhnacademy.auth.service.AccountService;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class AuthServiceImplTest {
+class AuthServiceImplTest extends ServiceTest {
 
   @Mock
   private PasswordEncoder passwordEncoder;

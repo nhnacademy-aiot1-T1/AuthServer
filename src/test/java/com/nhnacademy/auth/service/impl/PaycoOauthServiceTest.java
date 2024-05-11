@@ -8,24 +8,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.nhnacademy.auth.base.ServiceTest;
 import com.nhnacademy.auth.dto.PaycoUserInfo;
 import com.nhnacademy.auth.dto.domain.OauthUserInfo;
 import com.nhnacademy.auth.properties.PaycoOauthProperties;
 import com.nhnacademy.auth.service.dto.PaycoAccessTokenResponse;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class PaycoOauthServiceTest {
+class PaycoOauthServiceTest extends ServiceTest {
 
   @Mock
   private RestTemplate restTemplate;

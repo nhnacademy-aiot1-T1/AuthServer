@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.auth.base.ServiceTest;
 import com.nhnacademy.auth.dto.domain.UserInfo;
 import com.nhnacademy.auth.entity.TokenIssuanceInfo;
 import com.nhnacademy.auth.exception.ParseException;
@@ -32,10 +33,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@SuppressWarnings({"ALL", "NonAsciiCharacters"})
-@ExtendWith(MockitoExtension.class)
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class JwtServiceImplTest {
+class JwtServiceImplTest extends ServiceTest {
 
   @Mock
   private JwtProperties jwtProperties;
