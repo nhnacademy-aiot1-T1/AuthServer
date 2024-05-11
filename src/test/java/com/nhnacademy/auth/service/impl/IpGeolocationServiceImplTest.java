@@ -1,6 +1,5 @@
 package com.nhnacademy.auth.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.maxmind.geoip2.DatabaseReader;
@@ -9,7 +8,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,21 +17,14 @@ class IpGeolocationServiceImplTest extends ServiceTest {
 
   private IpGeolocationServiceImpl ipGeolocationService;
 
-  private String ip;
-
-  @BeforeEach
-  void setUp() throws Exception {
-
-    ip = "112.216.11.34";
-  }
 
   @Test
   @DisplayName("get contury in mobile ip")
   void getContury() throws IOException {
+    String ip = "112.216.11.34";
     BufferedInputStream inputStream = new BufferedInputStream( this.getClass().getClassLoader().getResourceAsStream("GeoLite2-Country.mmdb") );
     ipGeolocationService = new IpGeolocationServiceImpl(new DatabaseReader.Builder(inputStream).build());
-    String countryCode = ipGeolocationService.getCountry(ip);
-    assertNotNull(ipGeolocationService.getCountry(ip));
+    Assertions.assertThat(ipGeolocationService.getCountry(ip)).isEqualTo("KR");
   }
 
   @Test
