@@ -15,8 +15,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Payco Oauth 서비스.
  */
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class PaycoOauthService implements OauthService {
 
   public static final String PARAM_GRANT_TYPE = "grant_type";
@@ -38,15 +38,14 @@ public class PaycoOauthService implements OauthService {
   @Override
   public String requestAccessToken(String authCode) {
     URI uri = UriComponentsBuilder
-              .fromUriString(paycoOauthProperties.getTokenUrl())
-              .path(paycoOauthProperties.getTokenPath())
-              .queryParam(PARAM_GRANT_TYPE, GRANT_TYPE_VALUE)
-              .queryParam(PARAM_CLIENT_ID, paycoOauthProperties.getClientId())
-              .queryParam(PARAM_CLIENT_SECRET, paycoOauthProperties.getClientSecret())
-              .queryParam(PARAM_CODE, authCode)
-              .encode()
-              .build()
-              .toUri();
+        .fromUriString(paycoOauthProperties.getTokenUrl())
+        .queryParam(PARAM_GRANT_TYPE, GRANT_TYPE_VALUE)
+        .queryParam(PARAM_CLIENT_ID, paycoOauthProperties.getClientId())
+        .queryParam(PARAM_CLIENT_SECRET, paycoOauthProperties.getClientSecret())
+        .queryParam(PARAM_CODE, authCode)
+        .encode()
+        .build()
+        .toUri();
 
     PaycoAccessTokenResponse response = restTemplate.getForObject(
         uri, PaycoAccessTokenResponse.class);
@@ -65,12 +64,11 @@ public class PaycoOauthService implements OauthService {
   @Override
   public OauthUserInfo requestOauthUserInfo(String accessToken) {
     URI uri = UriComponentsBuilder
-              .fromUriString(paycoOauthProperties.getUserInfoUrl())
-              .path(paycoOauthProperties.getUserInfoPath())
-              .queryParam(PARAM_ACCESS_TOKEN, accessToken)
-              .encode()
-              .build()
-              .toUri();
+        .fromUriString(paycoOauthProperties.getUserInfoUrl())
+        .queryParam(PARAM_ACCESS_TOKEN, accessToken)
+        .encode()
+        .build()
+        .toUri();
     return restTemplate.getForObject(uri, PaycoUserInfo.class);
   }
 
