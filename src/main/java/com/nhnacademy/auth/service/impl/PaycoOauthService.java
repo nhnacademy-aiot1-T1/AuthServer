@@ -7,7 +7,12 @@ import com.nhnacademy.auth.properties.PaycoOauthProperties;
 import com.nhnacademy.auth.service.OauthService;
 import com.nhnacademy.auth.service.dto.PaycoAccessTokenResponse;
 import java.net.URI;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -65,11 +70,17 @@ public class PaycoOauthService implements OauthService {
   public OauthUserInfo requestOauthUserInfo(String accessToken) {
     URI uri = UriComponentsBuilder
         .fromUriString(paycoOauthProperties.getUserInfoUrl())
-        .queryParam(PARAM_ACCESS_TOKEN, accessToken)
         .encode()
         .build()
         .toUri();
-    return restTemplate.getForObject(uri, PaycoUserInfo.class);
-  }
 
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(PARAM_CLIENT_ID, paycoOauthProperties.getClientId());
+    headers.add(PARAM_ACCESS_TOKEN, accessToken);
+
+    HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
+    Optional<OauthUserInfo> response = Optional.ofNullable(restTemplate.exchange(uri, HttpMethod.POST, httpEntity, PaycoUserInfo.class).getBody());
+
+    return response.orElseThrow(() -> new OauthServerException("Payco에서 user정보를 가지고 오는데 실패 했습니다"));
+  }
 }
