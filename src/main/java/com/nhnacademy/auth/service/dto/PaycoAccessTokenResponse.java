@@ -1,5 +1,7 @@
 package com.nhnacademy.auth.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 /**
@@ -8,8 +10,10 @@ import lombok.Getter;
 @Getter
 public class PaycoAccessTokenResponse {
 
-  private final String accessToken;
+  @JsonProperty("access_token")
+  private String accessToken;
 
+  @JsonCreator
   public PaycoAccessTokenResponse(String accessToken) {
     this.accessToken = accessToken;
   }
