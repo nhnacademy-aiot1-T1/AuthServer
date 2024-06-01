@@ -1,0 +1,7 @@
+spring:
+  jpa:
+    open-in-view: false
+  application:
+    name: AUTH-SERVICE
+  profiles:
+    active: prod
