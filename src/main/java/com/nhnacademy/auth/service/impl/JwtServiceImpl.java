@@ -12,6 +12,7 @@ import com.nhnacademy.auth.exception.TokenNotReissuableException;
 import com.nhnacademy.auth.exception.UserAgentMismatchException;
 import com.nhnacademy.auth.properties.JwtProperties;
 import com.nhnacademy.auth.repository.AccessTokenRepository;
+import com.nhnacademy.auth.service.IpGeolocationService;
 import com.nhnacademy.auth.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -43,6 +44,7 @@ public class JwtServiceImpl implements JwtService {
   private final UserAgentStore userAgentStore;
   private final JwtProperties jwtProperties;
   private final AccessTokenRepository accessTokenRepository;
+  private final IpGeolocationService ipGeolocationService;
   private final DateHolder dateHolder;
   private final ObjectMapper objectMapper;
 
@@ -84,10 +86,25 @@ public class JwtServiceImpl implements JwtService {
    */
   @Override
   public void validateLocationChanged(TokenIssuanceInfo tokenInfo) {
-    if (!StringUtils.equals(tokenInfo.getBrowser(), userAgentStore.getUserBrowser())) {
+    final String requestIp = userAgentStore.getUserIp();
+    final String requestBrowser = userAgentStore.getUserBrowser();
+    final String tokenIp = tokenInfo.getIp();
+    final String tokenBrowser = tokenInfo.getBrowser();
+
+    if (!StringUtils.equals(tokenBrowser, requestBrowser)) {
       throw new UserAgentMismatchException();
     }
-    if (!StringUtils.equals(tokenInfo.getIp(), userAgentStore.getUserIp())) {
+    final String requestDevice = userAgentStore.getUserDevice();
+
+    if (StringUtils.equalsIgnoreCase(requestDevice, "mobile")) {
+      String requestCountry = ipGeolocationService.getCountry(requestIp);
+      String tokenCountry = ipGeolocationService.getCountry(tokenIp);
+      if (!StringUtils.equalsIgnoreCase(requestCountry, tokenCountry)) {
+        throw new UserAgentMismatchException();
+      }
+      return;
+    }
+    if (!StringUtils.equals(tokenIp, requestIp)) {
       throw new UserAgentMismatchException();
     }
   }
