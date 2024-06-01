@@ -1,17 +1,17 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ''
-    url: ''
-    password: ''
+    username:
+    url:
+    password:
 payco:
-  client-secret: ''
-  token-url: ''
-  client-id: ''
-  user-info-url: ''
+  client-secret:
+  token-url:
+  client-id:
+  user-info-url:
 eureka:
   client:
     service-url:
       defaultZone: http://192.168.0.23:8761/eureka
 jwt:
-  secret: ''
+  secret:
