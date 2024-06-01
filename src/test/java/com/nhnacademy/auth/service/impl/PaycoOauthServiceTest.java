@@ -13,11 +13,14 @@ import com.nhnacademy.auth.dto.PaycoUserInfo;
 import com.nhnacademy.auth.dto.domain.OauthUserInfo;
 import com.nhnacademy.auth.properties.PaycoOauthProperties;
 import com.nhnacademy.auth.service.dto.PaycoAccessTokenResponse;
+import java.net.URI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 class PaycoOauthServiceTest extends ServiceTest {
@@ -58,12 +61,11 @@ class PaycoOauthServiceTest extends ServiceTest {
       String accessToken = "testAccessToken";
       PaycoUserInfo paycoUserInfo = Mockito.mock(PaycoUserInfo.class);
       when(paycoOauthProperties.getUserInfoUrl()).thenReturn("exampleUrl");
-
-      when(restTemplate.getForObject(any(), eq(PaycoUserInfo.class))).thenReturn(paycoUserInfo);
+      when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any() ,eq(PaycoUserInfo.class))).thenReturn(ResponseEntity.ok(paycoUserInfo));
 
       OauthUserInfo result = paycoOauthService.requestOauthUserInfo(accessToken);
 
-      verify(restTemplate, times(1)).getForObject(any(), any());
+      verify(restTemplate, times(1)).exchange(any(URI.class), any(HttpMethod.class), any() ,eq(PaycoUserInfo.class));
       assertNotNull(result);
     }
   }
