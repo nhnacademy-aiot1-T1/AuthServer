@@ -11,12 +11,12 @@ public class ThreadLocalUserAgentStore implements UserAgentStore {
 
   private static final ThreadLocal<String> threadLocalUserBrowser = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalUserIp = new ThreadLocal<>();
+  private static final ThreadLocal<String> threadLocalUserDevice = new ThreadLocal<>();
 
   @Override
   public void setUserBrowser(String userAgent) {
     threadLocalUserBrowser.set(userAgent);
   }
-
 
   @Override
   public String getUserBrowser() {
@@ -34,8 +34,21 @@ public class ThreadLocalUserAgentStore implements UserAgentStore {
   }
 
   @Override
+  public void setUserDevice(String device) {
+    threadLocalUserDevice.set(device);
+  }
+
+  @Override
+  public String getUserDevice() {
+    return threadLocalUserDevice.get();
+  }
+
+  @Override
   public void clear() {
     threadLocalUserBrowser.remove();
     threadLocalUserIp.remove();
+    threadLocalUserDevice.remove();
   }
+
+
 }
