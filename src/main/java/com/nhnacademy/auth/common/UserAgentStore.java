@@ -15,4 +15,8 @@ public interface UserAgentStore {
 
   void clear();
 
+  void setUserDevice(String device);
+
+  String getUserDevice();
+
 }
