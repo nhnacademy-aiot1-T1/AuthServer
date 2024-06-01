@@ -2,9 +2,10 @@ package com.nhnacademy.auth.service.impl;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
-import com.nhnacademy.auth.service.IpGeolationService;
+import com.nhnacademy.auth.service.IpGeolocationService;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +17,26 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class IpGeolocationServiceImpl implements IpGeolationService {
+public class IpGeolocationServiceImpl implements IpGeolocationService {
 
   private final DatabaseReader databaseReader;
 
   @Override
-  public String getContury(String ip) throws IOException, GeoIp2Exception {
-    InetAddress inetAddress = InetAddress.getByName(ip);
-    String conturyIp = databaseReader.country(inetAddress).getCountry().getIsoCode();
-    return conturyIp;
+  // FIXME 사용자 정의 예외로 변경
+  public String getCountry(String ip)  {
+    InetAddress inetAddress;
+    try {
+      inetAddress = InetAddress.getByName(ip);
+    } catch (UnknownHostException e) {
+
+      throw new RuntimeException("UnknownHostException", e);
+    }
+    try {
+      return databaseReader.country(inetAddress).getCountry().getIsoCode();
+    } catch (IOException e) {
+      throw new RuntimeException("IOException", e);
+    } catch (GeoIp2Exception e) {
+      throw new RuntimeException("GeoIp2Exception", e);
+    }
   }
 }

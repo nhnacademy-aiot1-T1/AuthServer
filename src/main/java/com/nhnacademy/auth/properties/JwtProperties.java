@@ -1,18 +1,19 @@
 package com.nhnacademy.auth.properties;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
+/**
+ * JWT 관련 프로퍼티.
+ */
 @Getter
-@Setter
-@Configuration
+@AllArgsConstructor
+@ConstructorBinding
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
 
-  private String secret;
-  private Integer expirationTime;
-  private String tokenPrefix;
-  private String headerString;
+  private final String secret;
+
 }
